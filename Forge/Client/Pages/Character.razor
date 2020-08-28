@@ -1,0 +1,62 @@
+@page "/character"
+@page "/character/{Id}"
+@using Forge.Shared
+@using Forge.Shared.Data
+@inject HttpClient Http
+
+@if (_character == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    @if (string.IsNullOrEmpty(Id) == false)
+    {
+        <h1>Editing character</h1>
+    }
+    else
+    {
+        <h1>Creating character</h1>
+    }
+
+    <input placeholder="Name" @bind="_character.Name" />
+    <input placeholder="Description" @bind="_character.Description" />
+
+    <button class="btn btn-outline-primary" @onclick="Save">Save</button>
+}
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+    private CharacterModel _character { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Console.WriteLine($"Editing character: {Id}");
+        if (string.IsNullOrEmpty(Id) == false)
+        {
+            _character = await Http.GetFromJsonAsync<CharacterModel>($"api/character/getone?id={Id}");
+        }
+        else
+        {
+            _character = new CharacterModel()
+            {
+                Id = Guid.NewGuid()
+            };
+        }
+    }
+
+    private async void Save()
+    {
+        if (string.IsNullOrEmpty(Id) == false)
+        {
+            await Http.PostAsJsonAsync<CharacterModel>("api/character/Update", _character);
+        }
+        else
+        {
+            await Http.PostAsJsonAsync<CharacterModel>("api/character/Insert", _character);
+            Id = _character.Id.ToString();
+            StateHasChanged();
+        }
+    }
+}

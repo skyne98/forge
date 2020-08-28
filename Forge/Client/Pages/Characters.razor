@@ -1,0 +1,49 @@
+@page "/characters"
+@using Forge.Shared
+@using Forge.Shared.Data
+@inject HttpClient Http
+
+<h1>Characters</h1>
+
+@if (characters == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <a class="btn btn-primary" href="character">New character</a>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Edit</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var character in characters)
+            {
+            <tr>
+                <td>@character.Id</td>
+                <td>@character.Name</td>
+                <td>@character.Description</td>
+                <td>
+                    <a class="nav-link" href="character/@character.Id">
+                        <span class="oi oi-pencil" aria-hidden="true"></span> Edit
+                    </a>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private CharacterModel[] characters;
+
+    protected override async Task OnInitializedAsync()
+    {
+        characters = await Http.GetFromJsonAsync<CharacterModel[]>("api/character/get");
+    }
+}
