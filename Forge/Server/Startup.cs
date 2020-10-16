@@ -27,6 +27,7 @@ namespace Forge.Server
             services.AddSingleton<ILiteDbContext, LiteDbContext>();
             services.AddTransient<ILiteDbUserService, LiteDbUserService>();
             services.AddTransient<ILiteDbCharacterService, LiteDbCharacterService>();
+            services.AddTransient<ILiteDbCharacterTagService, LiteDbCharacterTagService>();
 
             services.AddControllersWithViews();
             services.AddRazorPages();

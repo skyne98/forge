@@ -26,7 +26,8 @@ namespace Forge.Server.Controllers
         [HttpGet]
         public IEnumerable<CharacterModel> Get()
         {
-            return _dbCharacterService.FindAll();
+            return _dbCharacterService.FindAll()
+                .OrderBy(character => character.Name);
         }
 
         [HttpGet]

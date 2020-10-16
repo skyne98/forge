@@ -19,13 +19,16 @@ namespace Forge.Server.Data
         public IEnumerable<CharacterModel> FindAll()
         {
             return _liteDb.GetCollection<CharacterModel>("Character")
+                .Include(x => x.Tags)
                 .FindAll();
         }
 
         public CharacterModel FindOne(Guid id)
         {
             return _liteDb.GetCollection<CharacterModel>("Character")
-                .Find(x => x.Id == id).FirstOrDefault();
+                .Include(x => x.Tags)
+                .Find(x => x.Id == id)
+                .FirstOrDefault();
         }
 
         public Guid Insert(CharacterModel character)

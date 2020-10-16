@@ -1,37 +1,35 @@
-@page "/characters"
+@page "/character-tags"
 @using Forge.Shared
 @using Forge.Shared.Data
 @inject HttpClient Http
 
-<h1>Characters</h1>
+<h1>Character tags</h1>
 
-@if (characters == null)
+@if (tags == null)
 {
     <p><em>Loading...</em></p>
 }
 else
 {
-    <div class="overview-action-bar">
-        <a class="btn btn-outline-primary overview-action-btn" href="character">New character</a>
-    </div>
+<div class="overview-action-bar">
+    <a class="btn btn-outline-primary overview-action-btn" href="character-tag">New tag</a>
+</div>
     <table class="table">
         <thead>
             <tr>
                 <th>ID</th>
                 <th>Name</th>
-                <th>Description</th>
                 <th>Edit</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var character in characters)
+            @foreach (var tag in tags)
             {
             <tr>
-                <td>@character.Id</td>
-                <td>@character.Name</td>
-                <td>@character.Description</td>
+                <td>@tag.Id</td>
+                <td>@tag.Name</td>
                 <td>
-                    <a class="nav-link" href="character/@character.Id">
+                    <a class="nav-link" href="character-tag/@tag.Id">
                         <span class="oi oi-pencil" aria-hidden="true"></span> Edit
                     </a>
                 </td>
@@ -42,10 +40,10 @@ else
 }
 
 @code {
-    private CharacterModel[] characters;
+    private CharacterTagModel[] tags;
 
     protected override async Task OnInitializedAsync()
     {
-        characters = await Http.GetFromJsonAsync<CharacterModel[]>("api/character/get");
+        tags = await Http.GetFromJsonAsync<CharacterTagModel[]>("api/charactertag/get");
     }
 }

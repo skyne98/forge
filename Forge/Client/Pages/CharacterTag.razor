@@ -1,0 +1,66 @@
+@page "/character-tag"
+@page "/character-tag/{Id}"
+@using Forge.Shared
+@using Forge.Shared.Data
+@using Markdig
+@inject HttpClient Http
+
+@if (_tag == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    @if (string.IsNullOrEmpty(Id) == false)
+    {
+        <h1>Editing tag</h1>
+    }
+    else
+    {
+        <h1>Creating tag</h1>
+    }
+
+<form>
+    <div class="form-group">
+        <label for="char_name">Name</label>
+        <input placeholder="Name" class="form-control" name="char_name" @bind="_tag.Name" />
+    </div>
+</form>
+<button class="btn btn-outline-primary" @onclick="Save">Save</button>
+}
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+    private CharacterTagModel _tag { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Console.WriteLine($"Editing tag: {Id}");
+        if (string.IsNullOrEmpty(Id) == false)
+        {
+            _tag = await Http.GetFromJsonAsync<CharacterTagModel>($"api/charactertag/getone?id={Id}");
+        }
+        else
+        {
+            _tag = new CharacterTagModel()
+            {
+                Id = Guid.NewGuid()
+            };
+        }
+    }
+
+    private async void Save()
+    {
+        if (string.IsNullOrEmpty(Id) == false)
+        {
+            await Http.PostAsJsonAsync<CharacterTagModel>("api/charactertag/Update", _tag);
+        }
+        else
+        {
+            await Http.PostAsJsonAsync<CharacterTagModel>("api/charactertag/Insert", _tag);
+            Id = _tag.Id.ToString();
+            StateHasChanged();
+        }
+    }
+}

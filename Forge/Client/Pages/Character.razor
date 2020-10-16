@@ -2,7 +2,9 @@
 @page "/character/{Id}"
 @using Forge.Shared
 @using Forge.Shared.Data
+@using Markdig
 @inject HttpClient Http
+@inject IToastService toastService
 
 @if (_character == null)
 {
@@ -19,16 +21,45 @@ else
         <h1>Creating character</h1>
     }
 
-    <input placeholder="Name" @bind="_character.Name" />
-    <input placeholder="Description" @bind="_character.Description" />
-
+    <form>
+        <div class="form-group">
+            <label for="char_name">Name</label>
+            <input placeholder="Name" class="form-control" name="char_name" @bind="_character.Name" />
+        </div>
+        <div class="form-group">
+            <label>Tags</label>
+            <Select2 TItem="CharacterTagModel"
+                     @ref="_selectControl"
+                     Id="tags_select"
+                     Data="@_tags"
+                     Theme="classic"
+                     IdEpxression="(item) => item.Id.ToString()"
+                     TextExpression="(item) => item.Name"
+                     @bind-Value="@_selectedTags">
+            </Select2>
+        </div>
+        <div class="form-group">
+            <label for="char_description">Description</label>
+            <div style="display: grid; grid-template-columns: 50% 50%; grid-template-areas: 'left right'; grid-gap: 15px">
+                <textarea class="form-control" name="char_description" rows="20" style="grid-template: left; height: 100%" placeholder="Description" @oninput="@(args => { _character.Description = args.Value.ToString(); RenderDescription(); })" @bind="_character.Description" />
+                <div style="grid-template: right">@((MarkupString)_descriptionMarkdown)</div>
+            </div>
+        </div>
+    </form>
     <button class="btn btn-outline-primary" @onclick="Save">Save</button>
 }
 
 @code {
     [Parameter]
     public string Id { get; set; }
+
     private CharacterModel _character { get; set; }
+    private string _descriptionMarkdown { get; set; }
+
+    private List<CharacterTagModel> _tags { get; set; }
+    private List<CharacterTagModel> _selectedTags { get; set; }
+
+    private Select2<CharacterTagModel> _selectControl;
 
     protected override async Task OnInitializedAsync()
     {
@@ -41,22 +72,70 @@ else
         {
             _character = new CharacterModel()
             {
-                Id = Guid.NewGuid()
+                Id = Guid.NewGuid(),
+                Name = string.Empty,
+                Description = string.Empty,
+                Tags = new List<CharacterTagModel>()
             };
         }
+
+        // Tags
+        var tagsArray = await Http.GetFromJsonAsync<CharacterTagModel[]>($"api/charactertag/get");
+        _tags = tagsArray.ToList();
+        if (_character.Tags == null)
+            _selectedTags = new List<CharacterTagModel>();
+        else
+            _selectedTags = _character.Tags.ToList();
+
+        // Description
+        RenderDescription();
     }
 
     private async void Save()
     {
+        Console.WriteLine($"Tags: {_selectedTags.Count} tags");
+        _character.Tags = _selectedTags;
+
+        var response = new HttpResponseMessage();
         if (string.IsNullOrEmpty(Id) == false)
         {
-            await Http.PostAsJsonAsync<CharacterModel>("api/character/Update", _character);
+            response = await Http.PostAsJsonAsync<CharacterModel>("api/character/Update", _character);
         }
         else
         {
-            await Http.PostAsJsonAsync<CharacterModel>("api/character/Insert", _character);
+            response = await Http.PostAsJsonAsync<CharacterModel>("api/character/Insert", _character);
             Id = _character.Id.ToString();
             StateHasChanged();
         }
+
+        if (response.IsSuccessStatusCode)
+        {
+            toastService.ShowSuccess("Save successful");
+        }
+        else
+        {
+            toastService.ShowError($"Error: {response.ReasonPhrase}");
+        }
+    }
+
+    private void RenderDescription()
+    {
+        _descriptionMarkdown = Render(_character.Description);
+        //Console.WriteLine($"Description: {_character.Description} | {_descriptionMarkdown}");
+        StateHasChanged();
+    }
+
+    private string Render(string description)
+    {
+        var result = "";
+
+        if (string.IsNullOrEmpty(description) == false)
+        {
+            var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+            result = Markdown.ToHtml(description, pipeline);
+        }
+
+        Console.WriteLine($"Render -> Finished rendering markdown...");
+        return result;
     }
 }
