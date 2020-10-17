@@ -10,4 +10,5 @@ deploy:
   api_key: "$GITHUB_TOKEN"
   file: "win10-x64.zip"
   skip_cleanup: true
-  draft: true
+  on:
+    tags: true
