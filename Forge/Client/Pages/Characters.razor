@@ -20,6 +20,7 @@ else
                 <th>ID</th>
                 <th>Name</th>
                 <th>Description</th>
+                <th>Tags</th>
                 <th>Edit</th>
             </tr>
         </thead>
@@ -30,6 +31,15 @@ else
                 <td>@character.Id</td>
                 <td>@character.Name</td>
                 <td>@character.Description</td>
+                <td>
+                    @if (character.Tags != null)
+                    {
+                        @foreach (var tag in character.Tags)
+                        {
+                            <span class="badge badge-secondary">@tag.Name</span>
+                        }
+                    }
+                </td>
                 <td>
                     <a class="nav-link" href="character/@character.Id">
                         <span class="oi oi-pencil" aria-hidden="true"></span> Edit
