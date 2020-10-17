@@ -4,6 +4,7 @@
 @using Forge.Shared.Data
 @using Markdig
 @inject HttpClient Http
+@inject NavigationManager NavigationManager
 
 @if (_tag == null)
 {
@@ -60,6 +61,7 @@ else
         {
             await Http.PostAsJsonAsync<CharacterTagModel>("api/charactertag/Insert", _tag);
             Id = _tag.Id.ToString();
+            NavigationManager.NavigateTo($"/character-tag/{Id}");
             StateHasChanged();
         }
     }
