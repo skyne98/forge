@@ -3,8 +3,8 @@ mono: none
 dotnet: 3.1
 script:
  - dotnet restore
- - dotnet build --configuration Release --runtime win10-x64
- - zip -9r win10-x64.zip Forge/Server/bin/Release/netcoreapp3.1/win10-x64
+ - dotnet publish --configuration Release --runtime win10-x64 
+ - zip -9r win10-x64.zip Forge/Server/bin/Release/netcoreapp3.1/win10-x64/publish
 deploy:
   provider: releases
   api_key: "$GITHUB_TOKEN"
