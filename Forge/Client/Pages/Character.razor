@@ -5,6 +5,7 @@
 @using Markdig
 @inject HttpClient Http
 @inject IToastService toastService
+@inject NavigationManager NavigationManager
 
 @if (_character == null)
 {
@@ -105,6 +106,7 @@ else
         {
             response = await Http.PostAsJsonAsync<CharacterModel>("api/character/Insert", _character);
             Id = _character.Id.ToString();
+            NavigationManager.NavigateTo($"/character/{Id}");
             StateHasChanged();
         }
 
