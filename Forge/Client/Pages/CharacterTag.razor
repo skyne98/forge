@@ -6,29 +6,16 @@
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 
-@if (_tag == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    @if (string.IsNullOrEmpty(Id) == false)
-    {
-        <h1>Editing tag</h1>
-    }
-    else
-    {
-        <h1>Creating tag</h1>
-    }
-
-<form>
-    <div class="form-group">
-        <label for="char_name">Name</label>
-        <input placeholder="Name" class="form-control" name="char_name" @bind="_tag.Name" />
-    </div>
-</form>
-<button class="btn btn-outline-primary" @onclick="Save">Save</button>
-}
+<DetailPage Title="Tag" OnSave="Save" IsLoading="@(_tag == null)" IsCreating="@string.IsNullOrEmpty(Id)">
+    <Body>
+        <form>
+            <div class="form-group">
+                <label for="char_name">Name</label>
+                <input placeholder="Name" class="form-control" name="char_name" @bind="_tag.Name" />
+            </div>
+        </form>
+    </Body>
+</DetailPage>
 
 @code {
     [Parameter]
