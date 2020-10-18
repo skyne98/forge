@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Forge.Server.Data;
 using Forge.Shared.Data;
+using Forge.Shared.Filters;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -38,6 +39,35 @@ namespace Forge.Server.Controllers
                 return Ok(_dbCharacterService.FindOne(id));
             else
                 return NotFound();
+        }
+
+        [HttpPost]
+        public IEnumerable<CharacterModel> GetFiltered(CharacterFilter filter)
+        {
+            return _dbCharacterService.FindAll()
+                .Where(character => {
+                    var result = true;
+                    if (string.IsNullOrEmpty(filter.Name) == false)
+                    {
+                        if (character.Name.ToLower().Contains(filter.Name.ToLower()) == false)
+                        {
+                            result = false;
+                        }
+                    }
+                    if (filter.Tags != null && filter.Tags.Count > 0)
+                    {
+                        foreach (var tag in filter.Tags)
+                        {
+                            if (character.Tags.Any(charTag => charTag.Id == tag) == false)
+                            {
+                                result = false;
+                            }
+                        }
+                    }
+
+                    return result;
+                })
+                .OrderBy(character => character.Name);
         }
 
         [HttpPost]

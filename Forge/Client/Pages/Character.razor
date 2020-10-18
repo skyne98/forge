@@ -4,7 +4,7 @@
 @using Forge.Shared.Data
 @using Markdig
 @inject HttpClient Http
-@inject IToastService toastService
+@inject IToastService ToastService
 @inject NavigationManager NavigationManager
 
 @if (_character == null)
@@ -33,7 +33,6 @@ else
                      @ref="_selectControl"
                      Id="tags_select"
                      Data="@_tags"
-                     Theme="classic"
                      IdEpxression="(item) => item.Id.ToString()"
                      TextExpression="(item) => item.Name"
                      @bind-Value="@_selectedTags">
@@ -112,11 +111,11 @@ else
 
         if (response.IsSuccessStatusCode)
         {
-            toastService.ShowSuccess("Save successful");
+            ToastService.ShowSuccess("Save successful");
         }
         else
         {
-            toastService.ShowError($"Error: {response.ReasonPhrase}");
+            ToastService.ShowError($"Error: {response.ReasonPhrase}");
         }
     }
 

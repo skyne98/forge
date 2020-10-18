@@ -1,11 +1,12 @@
 @page "/characters"
 @using Forge.Shared
+@using Forge.Shared.Filters;
 @using Forge.Shared.Data
 @inject HttpClient Http
 
 <h1>Characters</h1>
 
-@if (characters == null)
+@if (_characters == null)
 {
     <p><em>Loading...</em></p>
 }
@@ -14,6 +15,14 @@ else
     <div class="overview-action-bar">
         <a class="btn btn-outline-primary overview-action-btn" href="character">New character</a>
     </div>
+    <CollapsableFilter @bind-Model="_filterModel" OnFilterApplied="(CharacterFilter model) => FilterApplied(model)">
+        <TextFilterComponent Name="Name" Model="_filterModel" Placeholder="Name" ModelUpdate="(model, val) => model.Name = val"></TextFilterComponent>
+        <MultipleSelectFilterComponent Data="@_tags.ToList()"
+                                       IdEpxression="(tag) => tag.Id.ToString()"
+                                       TextExpression="(tag) => tag.Name"
+                                       Name="Tags" Model="_filterModel" 
+                                       ModelUpdate="(model, val) => model.Tags = val.Select(tag => tag.Id).ToList()"></MultipleSelectFilterComponent>
+    </CollapsableFilter>
     <table class="table">
         <thead>
             <tr>
@@ -25,7 +34,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var character in characters)
+            @foreach (var character in _characters)
             {
             <tr>
                 <td>@character.Id</td>
@@ -52,10 +61,23 @@ else
 }
 
 @code {
-    private CharacterModel[] characters;
+    private CharacterModel[] _characters;
+    private CharacterTagModel[] _tags;
+    private CharacterFilter _filterModel;
 
     protected override async Task OnInitializedAsync()
     {
-        characters = await Http.GetFromJsonAsync<CharacterModel[]>("api/character/get");
+        _characters = await Http.GetFromJsonAsync<CharacterModel[]>("api/character/get");
+        _tags = await Http.GetFromJsonAsync<CharacterTagModel[]>($"api/charactertag/get");
+
+        // Filter
+        _filterModel = new CharacterFilter();
+    }
+
+    private async void FilterApplied(CharacterFilter filterModel)
+    {
+        var result = await Http.PostAsJsonAsync<CharacterFilter>("api/character/getfiltered", filterModel);
+        _characters = await result.Content.ReadFromJsonAsync<CharacterModel[]>();
+        StateHasChanged();
     }
 }

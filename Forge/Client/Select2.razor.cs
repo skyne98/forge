@@ -43,7 +43,7 @@ namespace Forge.Client
 
         [Parameter] public string Placeholder { get; set; } = "Select value";
 
-        [Parameter] public string Theme { get; set; } = "bootstrap";
+        [Parameter] public string Theme { get; set; } = "bootstrap4";
 
         [Parameter] public string Class { get; set; } = "";
 
@@ -149,6 +149,9 @@ namespace Forge.Client
         {
             await base.OnInitializedAsync();
             _elementRef = DotNetObjectReference.Create(this);
+
+            if (Value == null)
+                throw new NullReferenceException("Value of Select2 should not be null at any time");
         }
 
         public override Task SetParametersAsync(ParameterView parameters)
@@ -203,7 +206,7 @@ namespace Forge.Client
                 return Task.FromResult(default(List<TItem>));
 
             var data = Data;
-            Console.WriteLine($"GetStaticData -> {String.Join(',', Data.Select(data => data.ToString()))}");
+            Console.WriteLine($"GetStaticData -> [{JsonSerializer.Serialize(Data)}]");
             var searchTerm = query.Term;
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
@@ -227,24 +230,32 @@ namespace Forge.Client
 
         internal Select2Item MapToSelect2Item(TItem item)
         {
-            var id = IdEpxression == null ? GetId(item) : IdEpxression.Compile().Invoke(item);
-            var text = TextExpression(item);
-            var select2Item = new Select2Item(id, text, IsOptionDisabled(item));
-            Console.WriteLine($"Mapping item - id: {id}, text: {text}");
-            if (OptionTemplate != null)
-                select2Item.Html = OptionTemplate(item);
-            if (Value.Count > 0)
+            try
             {
-                foreach (var selectedItem in Value)
+                var id = IdEpxression == null ? GetId(item) : IdEpxression.Compile().Invoke(item);
+                var text = TextExpression(item);
+                var select2Item = new Select2Item(id, text, IsOptionDisabled(item));
+                Console.WriteLine($"Mapping item - id: {id}, text: {text}");
+                if (OptionTemplate != null)
+                    select2Item.Html = OptionTemplate(item);
+                if (Value.Count > 0)
                 {
-                    var valueId = IdEpxression == null ? GetId(selectedItem) : IdEpxression.Compile().Invoke(selectedItem);
-                    if (valueId == id)
+                    foreach (var selectedItem in Value)
                     {
-                        select2Item.Selected = true;
+                        var valueId = IdEpxression == null ? GetId(selectedItem) : IdEpxression.Compile().Invoke(selectedItem);
+                        if (valueId == id)
+                        {
+                            select2Item.Selected = true;
+                        }
                     }
                 }
+                return select2Item;
             }
-            return select2Item;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.ToString()}, {ex.StackTrace}");
+                return null;
+            }
         }
 
         [JSInvokable("select2Blazor_GetData")]

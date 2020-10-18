@@ -1,0 +1,38 @@
+﻿@typeparam TModel
+
+@inherits FilterComponent<TModel, string>
+
+
+<div class="form-group" style="margin-right: 5px">
+    <label for="@Id">@Name</label>
+    @if (ReadOnly)
+    {
+        <input id="@Id" type="text" class="form-control" placeholder="@Placeholder" style="width: @Width" readonly @bind="Value" />
+    }
+    else
+    {
+        <input id="@Id" type="text" class="form-control" placeholder="@Placeholder" style="width: @Width" @bind="Value"/>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string Placeholder { get; set; }
+
+    [Parameter]
+    public string Width { get; set; } = "200px";
+
+    [Parameter]
+    public bool ReadOnly { get; set; }
+
+    private string _value;
+    private string Value { get { return _value; } set { _value = value; OnChange(); } }
+
+    private async void OnChange()
+    {
+        _value = _value.Trim();
+
+        ModelUpdate(Model, _value);
+        await CollapsableFilter.ModelChanged.InvokeAsync(Model);
+    }
+}

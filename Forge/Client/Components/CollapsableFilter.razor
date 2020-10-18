@@ -1,0 +1,71 @@
+﻿@typeparam TModel
+
+@using System.Text.Json;
+
+@inject JqueryService JqueryService
+
+<CascadingValue Value="this">
+    <div class="card">
+        <div class="card-header" @onclick="OpenFilter">
+            <span style="user-select: none">Filter @if (_filterActive)
+            {<span class="text-success">(Active)</span>}</span>
+            <span class="@_filterButtonOpenCloseClass float-right"></span>
+        </div>
+        <div id="filter-body" class="card-body" style="display: none">
+            <form>
+                <div style="display: flex; flex-direction: column">
+                    <div style="display: flex; flex-direction: row; flex-wrap: wrap; overflow-x: hidden">
+                        @ChildContent
+                    </div>
+                    <button class="btn btn-outline-primary" type="button" @onclick="ApplyFilter">Apply</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</CascadingValue>
+
+@code {
+    [Parameter]
+    public TModel Model { get; set; }
+
+    [Parameter]
+    public EventCallback<TModel> ModelChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<TModel> OnFilterApplied { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    private string _originalModelJson;
+    private string _filterButtonOpenCloseClass = "oi oi-chevron-bottom";
+    private bool _filterClosed = true;
+    private bool _filterActive = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        _originalModelJson = JsonSerializer.Serialize(Model);
+    }
+
+    private async void OpenFilter()
+    {
+        await JqueryService.Toggle("#filter-body", 100);
+        _filterClosed = !_filterClosed;
+
+        if (_filterClosed)
+            _filterButtonOpenCloseClass = "oi oi-chevron-bottom";
+        else
+            _filterButtonOpenCloseClass = "oi oi-chevron-top";
+
+        StateHasChanged();
+    }
+
+    private async void ApplyFilter()
+    {
+        Console.WriteLine($"ApplyFilter -> Applying {JsonSerializer.Serialize(Model)}");
+        await OnFilterApplied.InvokeAsync(Model);
+
+        _filterActive = JsonSerializer.Serialize(Model) != _originalModelJson;
+    }
+}
