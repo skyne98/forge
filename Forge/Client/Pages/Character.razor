@@ -15,7 +15,15 @@ else
 {
     @if (string.IsNullOrEmpty(Id) == false)
     {
-        <h1>Editing character</h1>
+        @if (_character.IsDeleted)
+        {
+            <h1>Viewing character</h1>
+        } 
+        else
+        {
+            <h1>Editing character</h1>
+        }
+        
     }
     else
     {
@@ -25,7 +33,7 @@ else
     <form>
         <div class="form-group">
             <label for="char_name">Name</label>
-            <input placeholder="Name" class="form-control" name="char_name" @bind="_character.Name" />
+            <input placeholder="Name" class="form-control" name="char_name" @bind="_character.Name" readonly="@Disabled"/>
         </div>
         <div class="form-group">
             <label>Tags</label>
@@ -36,18 +44,36 @@ else
                      Theme="classic"
                      IdEpxression="(item) => item.Id.ToString()"
                      TextExpression="(item) => item.Name"
-                     @bind-Value="@_selectedTags">
+                     @bind-Value="@_selectedTags"
+                     IsDisabled="@Disabled">
             </Select2>
         </div>
         <div class="form-group">
             <label for="char_description">Description</label>
             <div style="display: grid; grid-template-columns: 50% 50%; grid-template-areas: 'left right'; grid-gap: 15px">
-                <textarea class="form-control" name="char_description" rows="20" style="grid-template: left; height: 100%" placeholder="Description" @oninput="@(args => { _character.Description = args.Value.ToString(); RenderDescription(); })" @bind="_character.Description" />
+                <textarea class="form-control" name="char_description" rows="20" style="grid-template: left; height: 100%" placeholder="Description" @oninput="@(args => { _character.Description = args.Value.ToString(); RenderDescription(); })" @bind="_character.Description" readonly="@Disabled"/>
                 <div style="grid-template: right">@((MarkupString)_descriptionMarkdown)</div>
             </div>
         </div>
     </form>
-    <button class="btn btn-outline-primary" @onclick="Save">Save</button>
+    
+    @if (string.IsNullOrEmpty(Id) == false)
+    {
+        @if (_character.IsDeleted == false)
+        {
+            <button class="btn btn-outline-primary" @onclick="Save">Save</button>
+            <button class="btn btn-outline-primary" @onclick="Delete">Delete</button>
+        }
+        else
+        {
+            <button class="btn btn-outline-primary" @onclick="Restore">Restore</button>
+        }
+    }
+    else
+    {
+        <button class="btn btn-outline-primary" @onclick="Save">Save</button>
+    }
+    
 }
 
 @code {
@@ -61,6 +87,8 @@ else
     private List<CharacterTagModel> _selectedTags { get; set; }
 
     private Select2<CharacterTagModel> _selectControl;
+
+    private bool Disabled { get => _character.IsDeleted; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -76,7 +104,8 @@ else
                 Id = Guid.NewGuid(),
                 Name = string.Empty,
                 Description = string.Empty,
-                Tags = new List<CharacterTagModel>()
+                Tags = new List<CharacterTagModel>(),
+                IsDeleted = false
             };
         }
 
@@ -113,6 +142,40 @@ else
         if (response.IsSuccessStatusCode)
         {
             toastService.ShowSuccess("Save successful");
+        }
+        else
+        {
+            toastService.ShowError($"Error: {response.ReasonPhrase}");
+        }
+    }
+
+    private async void Delete()
+    {
+        var response = new HttpResponseMessage();
+        response = await Http.PostAsJsonAsync<Guid>("api/character/DeleteOne", _character.Id);
+
+        if (response.IsSuccessStatusCode)
+        {
+            toastService.ShowSuccess("Deletion successful");
+            _character.IsDeleted = true;
+            StateHasChanged();
+        }
+        else
+        {
+            toastService.ShowError($"Error: {response.ReasonPhrase}");
+        }
+    }
+
+    private async void Restore()
+    {
+        var response = new HttpResponseMessage();
+        response = await Http.PostAsJsonAsync<Guid>("api/character/RestoreOne", _character.Id);
+
+        if (response.IsSuccessStatusCode)
+        {
+            toastService.ShowSuccess("Restoration successful");
+            _character.IsDeleted = false;
+            StateHasChanged();
         }
         else
         {

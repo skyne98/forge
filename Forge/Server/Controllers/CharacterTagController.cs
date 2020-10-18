@@ -60,6 +60,33 @@ namespace Forge.Server.Controllers
                 return NotFound();
         }
 
+        [HttpPost]
+        public ActionResult<CharacterModel> DeleteOne([FromBody] Guid id)
+        {
+            var result = _dbCharacterTagService.DeleteOne(id);
+            if (result)
+            {
+                return Ok(_dbCharacterTagService.DeleteOne(id));
+            }
+            else
+            {
+                return NotFound();
+            } 
+        }
+
+        public ActionResult<CharacterModel> RestoreOne([FromBody] Guid id)
+        {
+            var result = _dbCharacterTagService.RestoreOne(id);
+            if (result)
+            {
+                return Ok(_dbCharacterTagService.RestoreOne(id));
+            }
+            else
+            {
+                return NotFound();
+            } 
+        }
+
         [HttpPost("{id}")]
         public ActionResult<CharacterTagModel> Delete(Guid id)
         {

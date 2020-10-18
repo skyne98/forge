@@ -4,6 +4,7 @@
 @using Forge.Shared.Data
 @using Markdig
 @inject HttpClient Http
+@inject IToastService toastService
 @inject NavigationManager NavigationManager
 
 @if (_tag == null)
@@ -14,26 +15,51 @@ else
 {
     @if (string.IsNullOrEmpty(Id) == false)
     {
-        <h1>Editing tag</h1>
+        @if (_tag.IsDeleted)
+        {
+            <h1>Viewing tag</h1>
+        } 
+        else
+        {
+            <h1>Editing tag</h1>
+        }
     }
     else
     {
         <h1>Creating tag</h1>
     }
 
-<form>
-    <div class="form-group">
-        <label for="char_name">Name</label>
-        <input placeholder="Name" class="form-control" name="char_name" @bind="_tag.Name" />
-    </div>
-</form>
-<button class="btn btn-outline-primary" @onclick="Save">Save</button>
+    <form>
+        <div class="form-group">
+            <label for="char_name">Name</label>
+                <input placeholder="Name" class="form-control" name="char_name" @bind="_tag.Name" readonly="@Disabled"/>
+        </div>
+    </form>
+    
+    @if (string.IsNullOrEmpty(Id) == false)
+    {
+        @if (_tag.IsDeleted == false)
+        {
+            <button class="btn btn-outline-primary" @onclick="Save">Save</button>
+            <button class="btn btn-outline-primary" @onclick="Delete">Delete</button>
+        }
+        else
+        {
+            <button class="btn btn-outline-primary" @onclick="Restore">Restore</button>
+        }
+    }
+    else
+    {
+        <button class="btn btn-outline-primary" @onclick="Save">Save</button>
+    }
 }
 
 @code {
     [Parameter]
     public string Id { get; set; }
     private CharacterTagModel _tag { get; set; }
+
+    private bool Disabled { get => _tag.IsDeleted; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -46,23 +72,69 @@ else
         {
             _tag = new CharacterTagModel()
             {
-                Id = Guid.NewGuid()
+                Id = Guid.NewGuid(),
+                Name = string.Empty,
+                IsDeleted = false
             };
         }
     }
 
     private async void Save()
     {
+        var response = new HttpResponseMessage();
         if (string.IsNullOrEmpty(Id) == false)
         {
-            await Http.PostAsJsonAsync<CharacterTagModel>("api/charactertag/Update", _tag);
+            response = await Http.PostAsJsonAsync<CharacterTagModel>("api/charactertag/Update", _tag);
         }
         else
         {
-            await Http.PostAsJsonAsync<CharacterTagModel>("api/charactertag/Insert", _tag);
+            response = await Http.PostAsJsonAsync<CharacterTagModel>("api/charactertag/Insert", _tag);
             Id = _tag.Id.ToString();
             NavigationManager.NavigateTo($"/character-tag/{Id}");
             StateHasChanged();
+        }
+
+        if (response.IsSuccessStatusCode)
+        {
+            toastService.ShowSuccess("Save successful");
+        }
+        else
+        {
+            toastService.ShowError($"Error: {response.ReasonPhrase}");
+        }
+    }
+
+    private async void Delete()
+    {
+        var response = new HttpResponseMessage();
+        response = await Http.PostAsJsonAsync<Guid>("api/charactertag/DeleteOne", _tag.Id);
+
+        if (response.IsSuccessStatusCode)
+        {
+            toastService.ShowSuccess("Deletion successful");
+            _tag.IsDeleted = true;
+            StateHasChanged();
+        }
+        else
+        {
+            toastService.ShowError($"Error: {response.ReasonPhrase}");
+        }
+    }
+
+    private async void Restore()
+    {
+        var response = new HttpResponseMessage();
+        response = await Http.PostAsJsonAsync<Guid>("api/charactertag/RestoreOne", _tag.Id);
+
+        if (response.IsSuccessStatusCode)
+        {
+            toastService.ShowSuccess("Restoration successful");
+            _tag.IsDeleted = false;
+            StateHasChanged();
+        }
+        else
+        {
+            toastService.ShowError($"Error: {response.ReasonPhrase}");
         }
     }
 }
