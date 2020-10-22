@@ -8,9 +8,13 @@ namespace Forge.Server.Data
 {
     public interface ILiteDbCharacterService
     {
-        bool Delete(Guid id);
-        IEnumerable<CharacterModel> FindAll();
-        CharacterModel FindOne(Guid id);
+        bool DeleteOne(Guid id);
+        bool DeleteRange(Guid[] ids);
+        bool RestoreOne(Guid id);
+        bool RestoreRange(Guid[] ids);
+        IEnumerable<CharacterModel> FindAll(bool includeDeleted = false);
+        CharacterModel FindOne(Guid id, bool includeDeleted = false);
+        IEnumerable<CharacterModel> FindRange(Guid[] ids, bool includeDeleted = false);
         Guid Insert(CharacterModel user);
         bool Update(CharacterModel user);
     }

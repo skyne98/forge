@@ -16,16 +16,25 @@ namespace Forge.Server.Data
             _liteDb = liteDbContext.Database;
         }
 
-        public IEnumerable<CharacterTagModel> FindAll()
+        public IEnumerable<CharacterTagModel> FindAll(bool includeDeleted = false)
         {
             return _liteDb.GetCollection<CharacterTagModel>("CharacterTag")
-                .FindAll();
+                    .Find(x => x.IsDeleted == false || includeDeleted);
+            
         }
 
-        public CharacterTagModel FindOne(Guid id)
+        public CharacterTagModel FindOne(Guid id, bool includeDeleted = false)
+        {
+            
+            return _liteDb.GetCollection<CharacterTagModel>("CharacterTag")
+                    .Find(x => x.Id == id && (x.IsDeleted == false || includeDeleted))
+                    .FirstOrDefault();
+        }
+
+        public IEnumerable<CharacterTagModel> FindRange(Guid[] ids, bool includeDeleted = false)
         {
             return _liteDb.GetCollection<CharacterTagModel>("CharacterTag")
-                .Find(x => x.Id == id).FirstOrDefault();
+                    .Find(x => ((x.IsDeleted == false) || includeDeleted) && ids.Contains(x.Id));
         }
 
         public Guid Insert(CharacterTagModel tag)
@@ -39,11 +48,44 @@ namespace Forge.Server.Data
             return _liteDb.GetCollection<CharacterTagModel>("CharacterTag")
                 .Update(tag);
         }
-
-        public bool Delete(Guid id)
+        
+        public bool DeleteOne(Guid id)
         {
-            return _liteDb.GetCollection<CharacterModel>("CharacterTag")
-                .Delete(id);
+            var tag = FindOne(id);
+            tag.IsDeleted = true;
+            return Update(tag);
+        }
+
+        public bool DeleteRange(Guid[] ids)
+        {
+            var tags = FindRange(ids);
+            var result = false;
+            foreach(var tag in tags)
+            {
+                tag.IsDeleted = true;
+                result = result || Update(tag);
+            }
+            return true;
+        }
+
+        public bool RestoreOne(Guid id)
+        {
+            var tag = FindOne(id, true);
+            tag.IsDeleted = false;
+            return Update(tag);
+        }
+
+        public bool RestoreRange(Guid[] ids)
+        {
+            var tags = FindRange(ids, true);
+            var result = false;
+            foreach(var tag in tags)
+            {
+                tag.IsDeleted = false;
+                result = result || Update(tag);
+            }
+
+            return true;
         }
     }
 }

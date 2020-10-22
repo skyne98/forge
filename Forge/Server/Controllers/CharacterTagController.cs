@@ -26,18 +26,18 @@ namespace Forge.Server.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<CharacterTagModel> Get()
+        public IEnumerable<CharacterTagModel> Get(bool includeDeleted = false)
         {
-            return _dbCharacterTagService.FindAll()
+            return _dbCharacterTagService.FindAll(includeDeleted)
                 .OrderBy(character => character.Name);
         }
 
         [HttpGet]
-        public ActionResult<CharacterTagModel> GetOne(Guid id)
+        public ActionResult<CharacterTagModel> GetOne(Guid id, bool includeDeleted = false)
         {
-            var result = _dbCharacterTagService.FindOne(id);
+            var result = _dbCharacterTagService.FindOne(id, includeDeleted);
             if (result != default)
-                return Ok(_dbCharacterTagService.FindOne(id));
+                return Ok(result);
             else
                 return NotFound();
         }
@@ -98,15 +98,33 @@ namespace Forge.Server.Controllers
             else
                 return NotFound();
         }
-
-        [HttpPost("{id}")]
-        public ActionResult<CharacterTagModel> Delete(Guid id)
+        
+        [HttpPost]
+        public ActionResult<CharacterModel> DeleteOne([FromBody] Guid id)
         {
-            var result = _dbCharacterTagService.Delete(id);
+            var result = _dbCharacterTagService.DeleteOne(id);
             if (result)
-                return NoContent();
+            {
+                return Ok(result);
+            }
             else
+            {
                 return NotFound();
+            } 
+        }
+        
+        [HttpPost]
+        public ActionResult<CharacterModel> RestoreOne([FromBody] Guid id)
+        {
+            var result = _dbCharacterTagService.RestoreOne(id);
+            if (result)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return NotFound();
+            } 
         }
     }
 }

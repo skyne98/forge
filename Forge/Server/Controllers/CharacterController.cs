@@ -26,18 +26,18 @@ namespace Forge.Server.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<CharacterModel> Get()
+        public IEnumerable<CharacterModel> Get(bool includeDeleted = false)
         {
-            return _dbCharacterService.FindAll()
+            return _dbCharacterService.FindAll(includeDeleted)
                 .OrderBy(character => character.Name);
         }
 
         [HttpGet]
-        public ActionResult<CharacterModel> GetOne(Guid id)
+        public ActionResult<CharacterModel> GetOne(Guid id, bool includeDeleted = false)
         {
-            var result = _dbCharacterService.FindOne(id);
+            var result = _dbCharacterService.FindOne(id, includeDeleted);
             if (result != default)
-                return Ok(_dbCharacterService.FindOne(id));
+                return Ok(result);
             else
                 return NotFound();
         }
@@ -109,15 +109,61 @@ namespace Forge.Server.Controllers
             else
                 return NotFound();
         }
-
-        [HttpPost("{id}")]
-        public ActionResult<CharacterModel> Delete(Guid id)
+        
+        [HttpPost]
+        public ActionResult<bool> DeleteOne([FromBody] Guid id)
         {
-            var result = _dbCharacterService.Delete(id);
+            var result = _dbCharacterService.DeleteOne(id);
             if (result)
-                return NoContent();
+            {
+                return Ok(result);
+            }
             else
+            {
                 return NotFound();
+            } 
+        }
+
+        [HttpPost]
+        public ActionResult<bool> DeleteRange([FromBody] Guid[] ids)
+        {
+            var result = _dbCharacterService.DeleteRange(ids);
+            if (result)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return NotFound();
+            } 
+        }
+        
+        [HttpPost]
+        public ActionResult<CharacterModel> RestoreOne([FromBody] Guid id)
+        {
+            var result = _dbCharacterService.RestoreOne(id);
+            if (result)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return NotFound();
+            } 
+        }
+
+        [HttpPost]
+        public ActionResult<CharacterModel> RestoreRange([FromBody] Guid[] ids)
+        {
+            var result = _dbCharacterService.RestoreRange(ids);
+            if (result)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return NotFound();
+            } 
         }
     }
 }
