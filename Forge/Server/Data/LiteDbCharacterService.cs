@@ -18,19 +18,9 @@ namespace Forge.Server.Data
 
         public IEnumerable<CharacterModel> FindAll(bool includeDeleted = false)
         {
-            if(includeDeleted)
-            {
-                return _liteDb.GetCollection<CharacterModel>("Character")
+            return _liteDb.GetCollection<CharacterModel>("Character")
                     .Include(x => x.Tags)
-                    .FindAll();
-            }
-            else
-            {
-                return _liteDb.GetCollection<CharacterModel>("Character")
-                    .Include(x => x.Tags)
-                    .Find(x => x.IsDeleted == false);
-            }
-            
+                    .Find(x => (x.IsDeleted == false) || includeDeleted);
         }
 
         public CharacterModel FindOne(Guid id, bool includeDeleted = false)
@@ -43,12 +33,8 @@ namespace Forge.Server.Data
 
         public List<CharacterModel> FindRange(Guid[] ids, bool includeDeleted = false)
         {
-            List<CharacterModel> characters = new List<CharacterModel>();
-            foreach(var id in ids)
-            {
-                characters.Add(FindOne(id, includeDeleted));
-            }
-            return characters;
+            var characters = FindAll(includeDeleted);
+            return characters.Where(character => ids.Contains(character.Id)).ToList();
         }
 
         public Guid Insert(CharacterModel character)
