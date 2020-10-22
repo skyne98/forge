@@ -14,6 +14,7 @@ namespace Forge.Client
 {
     public class Program
     {
+
         public static async Task Main(string[] args)
         {
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
@@ -21,6 +22,7 @@ namespace Forge.Client
 
             builder.Services.AddTransient(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
             builder.Services.AddTransient<JqueryService>();
+            builder.Services.AddTransient<DatatableService>();
             builder.Services.AddBlazoredToast();
 
             await builder.Build().RunAsync();

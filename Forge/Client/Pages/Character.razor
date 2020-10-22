@@ -39,7 +39,9 @@
 
 @code {
     [Parameter]
-    public string Id { get; set; }
+    public string Id { get; set; 
+    [Parameter]
+    public bool Disabled { get => _character?.IsDeleted ?? true; }
 
     private CharacterModel _character { get; set; }
     private string _descriptionMarkdown { get; set; }
@@ -48,9 +50,7 @@
     private List<CharacterTagModel> _selectedTags { get; set; }
 
     private Select2<CharacterTagModel> _selectControl;
-
-    private bool Disabled { get => _character?.IsDeleted ?? true; }
-
+      
     protected override async Task OnInitializedAsync()
     {
         Console.WriteLine($"Editing character: {Id}");
@@ -65,8 +65,7 @@
                 Id = Guid.NewGuid(),
                 Name = string.Empty,
                 Description = string.Empty,
-                Tags = new List<CharacterTagModel>(),
-                IsDeleted = false
+                Tags = new List<CharacterTagModel>()
             };
         }
 
@@ -109,7 +108,7 @@
             ToastService.ShowError($"Error: {response.ReasonPhrase}");
         }
     }
-
+      
     private async void Delete()
     {
         var response = new HttpResponseMessage();
@@ -143,7 +142,7 @@
             ToastService.ShowError($"Error: {response.ReasonPhrase}");
         }
     }
-
+      
     private void RenderDescription()
     {
         _descriptionMarkdown = Render(_character.Description);

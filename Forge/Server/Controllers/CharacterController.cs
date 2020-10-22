@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Forge.Server.Data;
 using Forge.Shared.Data;
 using Forge.Shared.Filters;
+using Forge.Shared.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -42,32 +43,51 @@ namespace Forge.Server.Controllers
         }
 
         [HttpPost]
-        public IEnumerable<CharacterModel> GetFiltered(CharacterFilter filter)
+        public ActionResult GetFiltered(CharacterFilter filter)
         {
-            return _dbCharacterService.FindAll()
-                .Where(character => {
-                    var result = true;
-                    if (string.IsNullOrEmpty(filter.Name) == false)
+            var characters = _dbCharacterService.FindAll();
+            var total = characters.Count();
+
+            // Order
+            characters = characters.OrderBy(character => character.Name);
+
+            var result = characters.Where(character =>
+            {
+                var result = true;
+                if (string.IsNullOrEmpty(filter.Name) == false)
+                {
+                    if (character.Name.ToLower().Contains(filter.Name.ToLower()) == false)
                     {
-                        if (character.Name.ToLower().Contains(filter.Name.ToLower()) == false)
+                        result = false;
+                    }
+                }
+                if (filter.Tags != null && filter.Tags.Count > 0)
+                {
+                    foreach (var tag in filter.Tags)
+                    {
+                        if (character.Tags.Any(charTag => charTag.Id == tag) == false)
                         {
                             result = false;
                         }
                     }
-                    if (filter.Tags != null && filter.Tags.Count > 0)
-                    {
-                        foreach (var tag in filter.Tags)
-                        {
-                            if (character.Tags.Any(charTag => charTag.Id == tag) == false)
-                            {
-                                result = false;
-                            }
-                        }
-                    }
+                }
 
-                    return result;
-                })
-                .OrderBy(character => character.Name);
+                return result;
+            });
+
+            var filtered = result.Count();
+
+            if (filter.Skip.HasValue)
+                result = result.Skip(filter.Skip.Value);
+            if (filter.Take.HasValue)
+                result = result.Take(filter.Take.Value);
+
+            return Ok(new CharacterFiltered()
+            {
+                Models = result.ToList(),
+                Filtered = filtered,
+                Total = total
+            });
         }
 
         [HttpPost]
@@ -89,7 +109,7 @@ namespace Forge.Server.Controllers
             else
                 return NotFound();
         }
-
+        
         [HttpPost]
         public ActionResult<bool> DeleteOne([FromBody] Guid id)
         {

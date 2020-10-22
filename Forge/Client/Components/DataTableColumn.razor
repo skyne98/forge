@@ -1,0 +1,28 @@
+﻿@typeparam TModel
+@typeparam TFilter
+
+@implements IDisposable
+
+@code {
+    [CascadingParameter]
+    public DataTable<TModel, TFilter> DataTable { get; set; }
+
+    [Parameter]
+    public string Name { get; set; } = "Column";
+
+    [Parameter]
+    public bool AutoWidth { get; set; } = true;
+
+    [Parameter]
+    public Func<TModel, string> GetValue { get; set; } = (model) => "None";
+
+    protected override void OnInitialized()
+    {
+        DataTable.AddColumn(this);
+    }
+
+    void IDisposable.Dispose()
+    {
+        DataTable.RemoveColumn(this);
+    }
+}

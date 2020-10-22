@@ -67,7 +67,7 @@ namespace Forge.Server.Data
             return _liteDb.GetCollection<CharacterTagModel>("CharacterTag")
                 .Update(tag);
         }
-
+        
         public bool DeleteOne(Guid id)
         {
             var tag = FindOne(id);

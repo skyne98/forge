@@ -73,7 +73,7 @@ namespace Forge.Server.Data
             return _liteDb.GetCollection<CharacterModel>("Character")
                 .Update(character);
         }
-
+        
         public bool DeleteOne(Guid id)
         {
             var character = FindOne(id);

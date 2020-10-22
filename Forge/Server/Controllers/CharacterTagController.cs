@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Forge.Server.Data;
 using Forge.Shared.Data;
+using Forge.Shared.Filters;
+using Forge.Shared.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -41,6 +43,43 @@ namespace Forge.Server.Controllers
         }
 
         [HttpPost]
+        public ActionResult GetFiltered(CharacterTagFilter filter)
+        {
+            var tags = _dbCharacterTagService.FindAll();
+            var total = tags.Count();
+
+            // Order
+            tags = tags.OrderBy(tag => tag.Name);
+
+            var result = tags.Where(tag => {
+                    var result = true;
+                    if (string.IsNullOrEmpty(filter.Name) == false)
+                    {
+                        if (tag.Name.ToLower().Contains(filter.Name.ToLower()) == false)
+                        {
+                            result = false;
+                        }
+                    }
+
+                    return result;
+                });
+
+            var filtered = result.Count();
+
+            if (filter.Skip.HasValue)
+                result = result.Skip(filter.Skip.Value);
+            if (filter.Take.HasValue)
+                result = result.Take(filter.Take.Value);
+
+            return Ok(new CharacterTagFiltered()
+            {
+                Models = result.ToList(),
+                Filtered = filtered,
+                Total = total
+            });
+        }
+
+        [HttpPost]
         public ActionResult<CharacterTagModel> Insert(CharacterTagModel dto)
         {
             var id = _dbCharacterTagService.Insert(dto);
@@ -59,7 +98,7 @@ namespace Forge.Server.Controllers
             else
                 return NotFound();
         }
-
+        
         [HttpPost]
         public ActionResult<CharacterModel> DeleteOne([FromBody] Guid id)
         {
