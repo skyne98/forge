@@ -37,7 +37,7 @@ namespace Forge.Server.Controllers
         {
             var result = _dbCharacterService.FindOne(id, includeDeleted);
             if (result != default)
-                return Ok(_dbCharacterService.FindOne(id, includeDeleted));
+                return Ok(result);
             else
                 return NotFound();
         }
@@ -144,7 +144,7 @@ namespace Forge.Server.Controllers
             var result = _dbCharacterService.RestoreOne(id);
             if (result)
             {
-                return Ok(_dbCharacterService.RestoreOne(id));
+                return Ok(result);
             }
             else
             {
