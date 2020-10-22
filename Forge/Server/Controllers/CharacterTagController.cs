@@ -37,7 +37,7 @@ namespace Forge.Server.Controllers
         {
             var result = _dbCharacterTagService.FindOne(id, includeDeleted);
             if (result != default)
-                return Ok(_dbCharacterTagService.FindOne(id, includeDeleted));
+                return Ok(result);
             else
                 return NotFound();
         }
