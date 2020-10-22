@@ -22,7 +22,7 @@
 @code {
     [Parameter]
     public string Id { get; set; }
-    [Parameter]
+
     public bool Disabled { get => _tag?.IsDeleted ?? true; }
     private CharacterTagModel _tag { get; set; }
   
@@ -44,17 +44,19 @@
 
     private async void Save()
     {
+        HttpResponseMessage response;
         if (string.IsNullOrEmpty(Id) == false)
         {
-            await Http.PostAsJsonAsync<CharacterTagModel>("api/charactertag/Update", _tag);
+            response = await Http.PostAsJsonAsync<CharacterTagModel>("api/charactertag/Update", _tag);
         }
         else
         {
-            await Http.PostAsJsonAsync<CharacterTagModel>("api/charactertag/Insert", _tag);
+            response = await Http.PostAsJsonAsync<CharacterTagModel>("api/charactertag/Insert", _tag);
             Id = _tag.Id.ToString();
             NavigationManager.NavigateTo($"/character-tag/{Id}");
             StateHasChanged();
         }
+
         if (response.IsSuccessStatusCode)
         {
             ToastService.ShowSuccess("Save successful");

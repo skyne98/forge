@@ -39,8 +39,8 @@
 
 @code {
     [Parameter]
-    public string Id { get; set; 
-    [Parameter]
+    public string Id { get; set; }
+    
     public bool Disabled { get => _character?.IsDeleted ?? true; }
 
     private CharacterModel _character { get; set; }

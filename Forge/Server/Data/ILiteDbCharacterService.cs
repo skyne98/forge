@@ -14,7 +14,7 @@ namespace Forge.Server.Data
         bool RestoreRange(Guid[] ids);
         IEnumerable<CharacterModel> FindAll(bool includeDeleted = false);
         CharacterModel FindOne(Guid id, bool includeDeleted = false);
-        List<CharacterModel> FindRange(Guid[] ids, bool includeDeleted = false);
+        IEnumerable<CharacterModel> FindRange(Guid[] ids, bool includeDeleted = false);
         Guid Insert(CharacterModel user);
         bool Update(CharacterModel user);
     }

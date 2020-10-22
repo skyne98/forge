@@ -13,5 +13,7 @@ namespace Forge.Shared.Data
 
         [BsonRef("CharacterTag")]
         public List<CharacterTagModel> Tags { get; set; }
+
+        public bool IsDeleted { get; set; }
     }
 }

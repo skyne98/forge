@@ -31,10 +31,11 @@ namespace Forge.Server.Data
                     .FirstOrDefault();
         }
 
-        public List<CharacterModel> FindRange(Guid[] ids, bool includeDeleted = false)
+        public IEnumerable<CharacterModel> FindRange(Guid[] ids, bool includeDeleted = false)
         {
-            var characters = FindAll(includeDeleted);
-            return characters.Where(character => ids.Contains(character.Id)).ToList();
+            return _liteDb.GetCollection<CharacterModel>("Character")
+                    .Include(x => x.Tags)
+                    .Find(x => ((x.IsDeleted == false) || includeDeleted) && ids.Contains(x.Id));
         }
 
         public Guid Insert(CharacterModel character)
@@ -59,19 +60,13 @@ namespace Forge.Server.Data
         public bool DeleteRange(Guid[] ids)
         {
             var characters = FindRange(ids);
-            if(characters.Contains(null))
+            var result = false;
+            foreach(var character in characters)
             {
-                return false;
+                character.IsDeleted = true;
+                result = result || Update(character);
             }
-            else
-            {
-                foreach(var character in characters)
-                {
-                    character.IsDeleted = true;
-                    Update(character);
-                }
-            }
-            return true;
+            return result;
         }
 
         public bool RestoreOne(Guid id)
@@ -84,17 +79,11 @@ namespace Forge.Server.Data
         public bool RestoreRange(Guid[] ids)
         {
             var characters = FindRange(ids, true);
-            if(characters.Contains(null))
+            var result = false;
+            foreach(var character in characters)
             {
-                return false;
-            }
-            else
-            {
-                foreach(var character in characters)
-                {
-                    character.IsDeleted = false;
-                    Update(character);
-                }
+                character.IsDeleted = false;
+                result = result || Update(character);
             }
             return true;
         }

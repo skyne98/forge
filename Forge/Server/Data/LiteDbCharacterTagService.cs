@@ -18,42 +18,23 @@ namespace Forge.Server.Data
 
         public IEnumerable<CharacterTagModel> FindAll(bool includeDeleted = false)
         {
-            if(includeDeleted)
-            {
-                return _liteDb.GetCollection<CharacterTagModel>("CharacterTag")
-                    .FindAll();
-            }
-            else
-            {
-                return _liteDb.GetCollection<CharacterTagModel>("CharacterTag")
-                    .Find(x => x.IsDeleted == false);
-            }
+            return _liteDb.GetCollection<CharacterTagModel>("CharacterTag")
+                    .Find(x => x.IsDeleted == false || includeDeleted);
             
         }
 
         public CharacterTagModel FindOne(Guid id, bool includeDeleted = false)
         {
             
-            if(includeDeleted)
-            {
-                return _liteDb.GetCollection<CharacterTagModel>("CharacterTag")
-                    .Find(x => x.Id == id).FirstOrDefault();
-            }
-            else
-            {
-                return _liteDb.GetCollection<CharacterTagModel>("CharacterTag")
-                    .Find(x => x.Id == id && x.IsDeleted == false).FirstOrDefault();
-            }
+            return _liteDb.GetCollection<CharacterTagModel>("CharacterTag")
+                    .Find(x => x.Id == id && (x.IsDeleted == false || includeDeleted))
+                    .FirstOrDefault();
         }
 
-        public List<CharacterTagModel> FindRange(Guid[] ids, bool includeDeleted = false)
+        public IEnumerable<CharacterTagModel> FindRange(Guid[] ids, bool includeDeleted = false)
         {
-            List<CharacterTagModel> tags = new List<CharacterTagModel>();
-            foreach(var id in ids)
-            {
-                tags.Add(FindOne(id, includeDeleted));
-            }
-            return tags;
+            return _liteDb.GetCollection<CharacterTagModel>("CharacterTag")
+                    .Find(x => ((x.IsDeleted == false) || includeDeleted) && ids.Contains(x.Id));
         }
 
         public Guid Insert(CharacterTagModel tag)
@@ -78,17 +59,11 @@ namespace Forge.Server.Data
         public bool DeleteRange(Guid[] ids)
         {
             var tags = FindRange(ids);
-            if(tags.Contains(null))
+            var result = false;
+            foreach(var tag in tags)
             {
-                return false;
-            }
-            else
-            {
-                foreach(var tag in tags)
-                {
-                    tag.IsDeleted = true;
-                    Update(tag);
-                }
+                tag.IsDeleted = true;
+                result = result || Update(tag);
             }
             return true;
         }
@@ -103,18 +78,13 @@ namespace Forge.Server.Data
         public bool RestoreRange(Guid[] ids)
         {
             var tags = FindRange(ids, true);
-            if(tags.Contains(null))
+            var result = false;
+            foreach(var tag in tags)
             {
-                return false;
+                tag.IsDeleted = false;
+                result = result || Update(tag);
             }
-            else
-            {
-                foreach(var tag in tags)
-                {
-                    tag.IsDeleted = false;
-                    Update(tag);
-                }
-            }
+
             return true;
         }
     }
