@@ -19,9 +19,9 @@ namespace Forge.Client.Services
             _jsRuntime = jsRuntime;
         }
 
-        public async ValueTask CreateTable<TModel, TFilter>(string table, DotNetObjectReference<DataTable<TModel, TFilter>> elementRef, string getData, List<DataTableColumnModel> columns, string detailPageUrl = null, bool editButton = false) where TFilter: BaseFilter
+        public async ValueTask CreateTable<TModel, TFilter>(string table, DotNetObjectReference<DataTable<TModel, TFilter>> elementRef, string getData, string renderCustomColumn, List<DataTableColumnModel> columns) where TFilter: BaseFilter
         {
-            await _jsRuntime.InvokeVoidAsync("datatableBlazor.createTable", table, elementRef, getData, JsonConvert.SerializeObject(columns), detailPageUrl, editButton);
+            await _jsRuntime.InvokeVoidAsync("datatableBlazor.createTable", table, elementRef, getData, renderCustomColumn, JsonConvert.SerializeObject(columns));
         }
 
         public async ValueTask RemoveTable(string table)

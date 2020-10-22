@@ -16,5 +16,8 @@ namespace Forge.Client.Models
 
         [JsonProperty("autoWidth")]
         public bool AutoWidth { get; set; } = true;
+
+        [JsonProperty("custom")]
+        public bool Custom { get; set; } = false;
     }
 }

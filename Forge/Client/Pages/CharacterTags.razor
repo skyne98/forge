@@ -14,9 +14,10 @@
     <TextFilterComponent TModel="CharacterTagFilter" Name="Name" Model="_filterModel" Placeholder="Name" ModelUpdate="(model, val) => model.Name = val"></TextFilterComponent>
 </CollapsableFilter>
 <div style="margin-bottom: 10px"></div>
-<DataTable @ref="_dataTable" TModel="CharacterTagModel" TFilter="CharacterTagFilter" GetData="async (filter, model) => await GetData(filter)" Filter="_filterModel" DetailPageUrl="character-tag/" EditButton="true">
+<DataTable @ref="_dataTable" TModel="CharacterTagModel" TFilter="CharacterTagFilter" GetData="async (filter, model) => await GetData(filter)" Filter="_filterModel">
     <DataTableColumn TModel="CharacterTagModel" TFilter="CharacterTagFilter" Name="Id" GetValue="(model) => model.Id.ToString()"></DataTableColumn>
     <DataTableColumn TModel="CharacterTagModel" TFilter="CharacterTagFilter" Name="Name" GetValue="(model) => model.Name.ToString()"></DataTableColumn>
+    <DataTableColumn TModel="CharacterTagModel" TFilter="CharacterTagFilter" Name="Edit" Render="RenderEdit"></DataTableColumn>
 </DataTable>
 <div style="margin-bottom: 10px"></div>
 
@@ -28,6 +29,11 @@
     {
         // Filter
         _filterModel = new CharacterTagFilter();
+    }
+
+    private string RenderEdit(CharacterTagModel model)
+    {
+        return "<a class=\"nav-link\" href=\"character-tag/" + model.Id + "\">Edit</a>";
     }
 
     private async Task FilterApplied(CharacterTagFilter filterModel)

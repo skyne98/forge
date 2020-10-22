@@ -3,6 +3,7 @@
 @using Forge.Shared.Filters
 @using Forge.Shared.Data
 @using Forge.Shared.ViewModels
+@using Newtonsoft.Json
 @inject HttpClient Http
 
 <h1>Characters</h1>
@@ -20,9 +21,11 @@
                                    ModelUpdate="(model, val) => { Console.WriteLine(val); model.Tags = val.Select(tag => tag.Id).ToList(); }"></MultipleSelectFilterComponent>
 </CollapsableFilter>
 <div style="margin-bottom: 10px"></div>
-<DataTable @ref="_dataTable" TModel="CharacterModel" TFilter="CharacterFilter" GetData="async (filter, model) => await GetData(filter)" Filter="_filterModel" DetailPageUrl="character/" EditButton="true">
+<DataTable @ref="_dataTable" TModel="CharacterModel" TFilter="CharacterFilter" GetData="async (filter, model) => await GetData(filter)" Filter="_filterModel">
     <DataTableColumn TModel="CharacterModel" TFilter="CharacterFilter" Name="Id" GetValue="(model) => model.Id.ToString()"></DataTableColumn>
     <DataTableColumn TModel="CharacterModel" TFilter="CharacterFilter" Name="Name" GetValue="(model) => model.Name.ToString()"></DataTableColumn>
+    <DataTableColumn TModel="CharacterModel" TFilter="CharacterFilter" Name="Tags" GetValue="(model) => model.Tags" Render="RenderTags"></DataTableColumn>
+    <DataTableColumn TModel="CharacterModel" TFilter="CharacterFilter" Name="Edit" Render="RenderEdit"></DataTableColumn>
 </DataTable>
 <div style="margin-bottom: 10px"></div>
 
@@ -37,6 +40,18 @@
         _filterModel = new CharacterFilter();
 
         _tags = (await Http.GetFromJsonAsync<CharacterTagModel[]>($"api/charactertag/get")).ToList();
+    }
+
+    private string RenderTags(CharacterModel model)
+    {
+        var tagsToRender = model.Tags.Select(tag => _tags.First(t => t.Id == tag.Id));
+
+        return $"<div style=\"display: flex; flex-direction: row\">" + String.Join("", tagsToRender.Select(tag => $"<span class=\"badge badge-pill badge-primary\" style=\"margin-right: 5px\">" + tag.Name + "</span>")) + "</div>";
+    }
+
+    private string RenderEdit(CharacterModel model)
+    {
+        return "<a class=\"nav-link\" href=\"character/" + model.Id + "\">Edit</a>";
     }
 
     private async Task FilterApplied(CharacterFilter filterModel)
