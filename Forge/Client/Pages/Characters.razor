@@ -24,7 +24,7 @@
 <DataTable @ref="_dataTable" TModel="CharacterModel" TFilter="CharacterFilter" GetData="async (filter, model) => await GetData(filter)" Filter="_filterModel">
     <DataTableColumn TModel="CharacterModel" TFilter="CharacterFilter" Name="Id" GetValue="(model) => model.Id.ToString()"></DataTableColumn>
     <DataTableColumn TModel="CharacterModel" TFilter="CharacterFilter" Name="Name" GetValue="(model) => model.Name.ToString()"></DataTableColumn>
-    <DataTableColumn TModel="CharacterModel" TFilter="CharacterFilter" Name="Tags" GetValue="(model) => model.Tags" Render="RenderTags"></DataTableColumn>
+    <DataTableColumn TModel="CharacterModel" TFilter="CharacterFilter" Name="Tags" AutoWidth="false" GetValue="(model) => model.Tags" Render="RenderTags"></DataTableColumn>
     <DataTableColumn TModel="CharacterModel" TFilter="CharacterFilter" Name="Edit" Render="RenderEdit"></DataTableColumn>
 </DataTable>
 <div style="margin-bottom: 10px"></div>
@@ -46,7 +46,7 @@
     {
         var tagsToRender = model.Tags.Select(tag => _tags.First(t => t.Id == tag.Id));
 
-        return $"<div style=\"display: flex; flex-direction: row\">" + String.Join("", tagsToRender.Select(tag => $"<span class=\"badge badge-pill badge-secondary\" style=\"margin-right: 5px\">" + tag.Name + "</span>")) + "</div>";
+        return $"<div style=\"display: flex; flex-direction: row; flex-wrap: wrap\">" + String.Join("", tagsToRender.Select(tag => $"<span class=\"badge badge-pill badge-secondary\" style=\"margin-right: 5px; margin-bottom: 5px\">" + tag.Name + "</span>")) + "</div>";
     }
 
     private string RenderEdit(CharacterModel model)
