@@ -22,5 +22,7 @@ namespace Forge.Shared.Data
                 return Id == t.Id;
             }
         }
+
+        public bool IsDeleted { get; set; }
     }
 }

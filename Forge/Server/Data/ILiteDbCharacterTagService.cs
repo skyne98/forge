@@ -9,6 +9,8 @@ namespace Forge.Server.Data
     public interface ILiteDbCharacterTagService
     {
         bool Delete(Guid id);
+        bool DeleteOne(Guid id);
+        bool RestoreOne(Guid id);
         IEnumerable<CharacterTagModel> FindAll();
         CharacterTagModel FindOne(Guid id);
         Guid Insert(CharacterTagModel tag);

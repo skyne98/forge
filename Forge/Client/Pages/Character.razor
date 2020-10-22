@@ -48,6 +48,8 @@
 
     private Select2<CharacterTagModel> _selectControl;
 
+    private bool Disabled { get => _character.IsDeleted; }
+
     protected override async Task OnInitializedAsync()
     {
         Console.WriteLine($"Editing character: {Id}");
@@ -62,7 +64,8 @@
                 Id = Guid.NewGuid(),
                 Name = string.Empty,
                 Description = string.Empty,
-                Tags = new List<CharacterTagModel>()
+                Tags = new List<CharacterTagModel>(),
+                IsDeleted = false
             };
         }
 
@@ -103,6 +106,40 @@
         else
         {
             ToastService.ShowError($"Error: {response.ReasonPhrase}");
+        }
+    }
+
+    private async void Delete()
+    {
+        var response = new HttpResponseMessage();
+        response = await Http.PostAsJsonAsync<Guid>("api/character/DeleteOne", _character.Id);
+
+        if (response.IsSuccessStatusCode)
+        {
+            toastService.ShowSuccess("Deletion successful");
+            _character.IsDeleted = true;
+            StateHasChanged();
+        }
+        else
+        {
+            toastService.ShowError($"Error: {response.ReasonPhrase}");
+        }
+    }
+
+    private async void Restore()
+    {
+        var response = new HttpResponseMessage();
+        response = await Http.PostAsJsonAsync<Guid>("api/character/RestoreOne", _character.Id);
+
+        if (response.IsSuccessStatusCode)
+        {
+            toastService.ShowSuccess("Restoration successful");
+            _character.IsDeleted = false;
+            StateHasChanged();
+        }
+        else
+        {
+            toastService.ShowError($"Error: {response.ReasonPhrase}");
         }
     }
 
