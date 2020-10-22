@@ -7,74 +7,34 @@
 @inject IToastService ToastService
 @inject NavigationManager NavigationManager
 
-@if (_character == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    @if (string.IsNullOrEmpty(Id) == false)
-    {
-        @if (_character.IsDeleted)
-        {
-            <h1>Viewing character</h1>
-        } 
-        else
-        {
-            <h1>Editing character</h1>
-        }
-        
-    }
-    else
-    {
-        <h1>Creating character</h1>
-    }
-
-    <form>
-        <div class="form-group">
-            <label for="char_name">Name</label>
-            <input placeholder="Name" class="form-control" name="char_name" @bind="_character.Name" readonly="@Disabled"/>
-        </div>
-        <div class="form-group">
-            <label>Tags</label>
-            <Select2 TItem="CharacterTagModel"
-                     @ref="_selectControl"
-                     Id="tags_select"
-                     Data="@_tags"
-                     Theme="classic"
-                     IdEpxression="(item) => item.Id.ToString()"
-                     TextExpression="(item) => item.Name"
-                     @bind-Value="@_selectedTags"
-                     IsDisabled="@Disabled">
-            </Select2>
-        </div>
-        <div class="form-group">
-            <label for="char_description">Description</label>
-            <div style="display: grid; grid-template-columns: 50% 50%; grid-template-areas: 'left right'; grid-gap: 15px">
-                <textarea class="form-control" name="char_description" rows="20" style="grid-template: left; height: 100%" placeholder="Description" @oninput="@(args => { _character.Description = args.Value.ToString(); RenderDescription(); })" @bind="_character.Description" readonly="@Disabled"/>
-                <div style="grid-template: right">@((MarkupString)_descriptionMarkdown)</div>
+<DetailPage Title="Character" OnSave="Save" IsLoading="@(_character == null)" IsCreating="@string.IsNullOrEmpty(Id)">
+    <Body>
+        <form>
+            <div class="form-group">
+                <label for="char_name">Name</label>
+                <input placeholder="Name" class="form-control" name="char_name" @bind="_character.Name" />
             </div>
-        </div>
-    </form>
-    
-    @if (string.IsNullOrEmpty(Id) == false)
-    {
-        @if (_character.IsDeleted == false)
-        {
-            <button class="btn btn-outline-primary" @onclick="Save">Save</button>
-            <button class="btn btn-outline-primary" @onclick="Delete">Delete</button>
-        }
-        else
-        {
-            <button class="btn btn-outline-primary" @onclick="Restore">Restore</button>
-        }
-    }
-    else
-    {
-        <button class="btn btn-outline-primary" @onclick="Save">Save</button>
-    }
-    
-}
+            <div class="form-group">
+                <label>Tags</label>
+                <Select2 TItem="CharacterTagModel"
+                         @ref="_selectControl"
+                         Id="tags_select"
+                         Data="@_tags"
+                         IdEpxression="(item) => item.Id.ToString()"
+                         TextExpression="(item) => item.Name"
+                         @bind-Value="@_selectedTags">
+                </Select2>
+            </div>
+            <div class="form-group">
+                <label for="char_description">Description</label>
+                <div style="display: grid; grid-template-columns: 50% 50%; grid-template-areas: 'left right'; grid-gap: 15px">
+                    <textarea class="form-control" name="char_description" rows="20" style="grid-template: left; height: 100%" placeholder="Description" @oninput="@(args => { _character.Description = args.Value.ToString(); RenderDescription(); })" @bind="_character.Description" />
+                    <div style="grid-template: right">@((MarkupString)_descriptionMarkdown)</div>
+                </div>
+            </div>
+        </form>
+    </Body>
+</DetailPage>
 
 @code {
     [Parameter]

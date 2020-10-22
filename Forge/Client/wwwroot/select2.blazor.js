@@ -6,9 +6,10 @@ window.select2Blazor = {
         options = JSON.parse(options);
         if (typeof (getData) != "undefined" && getData != null) {
             console.log('JS -> Initializing select2 -> Setting getData');
-            options.width = '100%';
+            options.width = "100%";
             options.ajax = {
                 delay: 250,
+                dataType: 'json',
                 data: function (params) {
                     return {
                         type: params._type,
@@ -20,7 +21,12 @@ window.select2Blazor = {
                 transport: function (params, success, failure) {
                     console.log('JS -> Trying to call getData', getData, 'with params', params);
                     var request = dotnetHelper.invokeMethodAsync(getData, params);
-                    return request.then(success).catch(failure);
+                    return request.then(success)
+                        .then(data => {
+                            console.log('JS -> Got data', data);
+                            return data;
+                        })
+                        .catch(failure);
                 },
                 processResults: data => {
                     console.log('JS -> Processing select2 data', data);

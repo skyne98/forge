@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Blazored.Toast;
+using Forge.Client.Services;
 
 namespace Forge.Client
 {
@@ -19,6 +20,7 @@ namespace Forge.Client
             builder.RootComponents.Add<App>("app");
 
             builder.Services.AddTransient(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+            builder.Services.AddTransient<JqueryService>();
             builder.Services.AddBlazoredToast();
 
             await builder.Build().RunAsync();
