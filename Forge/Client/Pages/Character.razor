@@ -40,14 +40,14 @@
 @code {
     [Parameter]
     public string Id { get; set; }
-    
+
     public bool Disabled { get => _character?.IsDeleted ?? true; }
 
     private CharacterModel _character { get; set; }
     private string _descriptionMarkdown { get; set; }
 
     private List<CharacterTagModel> _tags { get; set; }
-    private List<CharacterTagModel> _selectedTags { get; set; }
+    private List<CharacterTagModel> _selectedTags { get; set; } = new List<CharacterTagModel>();
 
     private Select2<CharacterTagModel> _selectControl;
       
@@ -72,10 +72,7 @@
         // Tags
         var tagsArray = await Http.GetFromJsonAsync<CharacterTagModel[]>($"api/charactertag/get");
         _tags = tagsArray.ToList();
-        if (_character.Tags == null)
-            _selectedTags = new List<CharacterTagModel>();
-        else
-            _selectedTags = _character.Tags.ToList();
+        _selectedTags = _character.Tags.ToList();
 
         // Description
         RenderDescription();
