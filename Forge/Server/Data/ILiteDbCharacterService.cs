@@ -8,7 +8,6 @@ namespace Forge.Server.Data
 {
     public interface ILiteDbCharacterService
     {
-        bool Delete(Guid id);
         bool DeleteOne(Guid id);
         bool RestoreOne(Guid id);
         IEnumerable<CharacterModel> FindAll();

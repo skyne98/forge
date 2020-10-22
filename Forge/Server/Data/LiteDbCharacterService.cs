@@ -46,27 +46,17 @@ namespace Forge.Server.Data
         public bool DeleteOne(Guid id)
         {
             var character = _liteDb.GetCollection<CharacterModel>("Character")
-                .Include(x => x.Tags)
-                .Find(x => x.Id == id)
-                .FirstOrDefault();
+                .Include(x => x.Tags).FindOne(x => x.Id == id);
             character.IsDeleted = true;
             return Update(character);
         }
 
         public bool RestoreOne(Guid id)
         {
-            CharacterModel character = _liteDb.GetCollection<CharacterModel>("Character")
-                .Include(x => x.Tags)
-                .Find(x => x.Id == id)
-                .FirstOrDefault();
+            var character = _liteDb.GetCollection<CharacterModel>("Character")
+                .Include(x => x.Tags).FindOne(x => x.Id == id);
             character.IsDeleted = false;
-            return _liteDb.GetCollection<CharacterModel>("Character").Update(character);
-        }
-
-        public bool Delete(Guid id)
-        {
-            return _liteDb.GetCollection<CharacterModel>("Character")
-                .Delete(id);
+            return Update(character);
         }
     }
 }

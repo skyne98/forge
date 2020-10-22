@@ -4,7 +4,7 @@
 @using Forge.Shared.Data
 @using Markdig
 @inject HttpClient Http
-@inject IToastService toastService
+@inject IToastService ToastService
 @inject NavigationManager NavigationManager
 
 @if (_character == null)
@@ -141,11 +141,11 @@ else
 
         if (response.IsSuccessStatusCode)
         {
-            toastService.ShowSuccess("Save successful");
+            ToastService.ShowSuccess("Save successful");
         }
         else
         {
-            toastService.ShowError($"Error: {response.ReasonPhrase}");
+            ToastService.ShowError($"Error: {response.ReasonPhrase}");
         }
     }
 
@@ -156,13 +156,13 @@ else
 
         if (response.IsSuccessStatusCode)
         {
-            toastService.ShowSuccess("Deletion successful");
+            ToastService.ShowSuccess("Deletion successful");
             _character.IsDeleted = true;
             StateHasChanged();
         }
         else
         {
-            toastService.ShowError($"Error: {response.ReasonPhrase}");
+            ToastService.ShowError($"Error: {response.ReasonPhrase}");
         }
     }
 
@@ -173,13 +173,13 @@ else
 
         if (response.IsSuccessStatusCode)
         {
-            toastService.ShowSuccess("Restoration successful");
+            ToastService.ShowSuccess("Restoration successful");
             _character.IsDeleted = false;
             StateHasChanged();
         }
         else
         {
-            toastService.ShowError($"Error: {response.ReasonPhrase}");
+            ToastService.ShowError($"Error: {response.ReasonPhrase}");
         }
     }
 

@@ -73,6 +73,8 @@ namespace Forge.Server.Controllers
                 return NotFound();
             } 
         }
+        
+        [HttpPost]
         public ActionResult<CharacterModel> RestoreOne([FromBody] Guid id)
         {
             var result = _dbCharacterService.RestoreOne(id);
@@ -84,16 +86,6 @@ namespace Forge.Server.Controllers
             {
                 return NotFound();
             } 
-        }
-
-        [HttpPost("{id}")]
-        public ActionResult<CharacterModel> Delete(Guid id)
-        {
-            var result = _dbCharacterService.Delete(id);
-            if (result)
-                return NoContent();
-            else
-                return NotFound();
         }
     }
 }
