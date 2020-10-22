@@ -43,26 +43,6 @@ namespace Forge.Server.Data
                 .Update(character);
         }
 
-        public bool DeleteOne(Guid id)
-        {
-            var character = _liteDb.GetCollection<CharacterModel>("Character")
-                .Include(x => x.Tags)
-                .Find(x => x.Id == id)
-                .FirstOrDefault();
-            character.IsDeleted = true;
-            return Update(character);
-        }
-
-        public bool RestoreOne(Guid id)
-        {
-            CharacterModel character = _liteDb.GetCollection<CharacterModel>("Character")
-                .Include(x => x.Tags)
-                .Find(x => x.Id == id)
-                .FirstOrDefault();
-            character.IsDeleted = false;
-            return _liteDb.GetCollection<CharacterModel>("Character").Update(character);
-        }
-
         public bool Delete(Guid id)
         {
             return _liteDb.GetCollection<CharacterModel>("Character")
