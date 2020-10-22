@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using Forge.Shared.Filters;
+using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Forge.Client.Components.FilterComponents
 {
-    public abstract class FilterComponent<TModel, TValue>: ComponentBase
+    public abstract class FilterComponent<TModel, TValue>: ComponentBase where TModel: BaseFilter
     {
         [Parameter]
         public TModel Model { get; set; }

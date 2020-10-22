@@ -1,0 +1,153 @@
+﻿@using Newtonsoft.Json
+@using Newtonsoft.Json.Linq
+@using System.Text.Json
+@using Forge.Shared.ViewModels
+@using Forge.Shared.Filters
+
+@typeparam TModel
+@typeparam TFilter
+
+@inject DatatableService DatatableService
+@implements IDisposable
+
+<div>
+    <CascadingValue Value="this">
+        @ChildContent
+        <table @ref="TableRef" id="@Id" class="table">
+            <thead>
+                <tr>
+                    @foreach (var column in Columns)
+                    {
+                        <th>@column.Name</th>
+                    }
+                    @if (EditButton)
+                    {
+                        <th>Edit</th>
+                    }
+                </tr>
+            </thead>
+        </table>
+    </CascadingValue>
+</div>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; } = Guid.NewGuid();
+
+    [Parameter]
+    public bool EditButton { get; set; } = false;
+
+    [Parameter]
+    public string DetailPageUrl { get; set; } = null;
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public TFilter Filter { get; set; }
+
+    public ElementReference TableRef { get; set; }
+
+    /// <summary>
+    /// Function for getting the table data fn(take, skip) => (Models, total)
+    /// </summary>
+    [Parameter]
+    public Func<TFilter, TModel, Task<BaseFiltered<TModel>>> GetData { get; set; }
+
+    private List<DataTableColumn<TModel, TFilter>> Columns { get; set; } = new List<DataTableColumn<TModel, TFilter>>();
+    private DotNetObjectReference<DataTable<TModel, TFilter>> _elementRef;
+    private bool _secondRender = false;
+
+    public void AddColumn(DataTableColumn<TModel, TFilter> column)
+    {
+        Console.WriteLine($"DataTable -> Got new columns {column.Name}");
+        Columns.Add(column);
+    }
+
+    public void RemoveColumn(DataTableColumn<TModel, TFilter> column)
+    {
+        Columns.Remove(column);
+    }
+
+    public async Task Reload()
+    {
+        Console.WriteLine($"Reload -> Reloading the table with filter {JsonConvert.SerializeObject(Filter)}");
+        await DatatableService.ReloadTable($"#{Id}");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        _elementRef = DotNetObjectReference.Create(this);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            StateHasChanged();
+        }
+        if (firstRender == false && _secondRender == false)
+        {
+            var columns = Columns.Select(col => new DataTableColumnModel()
+            {
+                Name = col.Name,
+                Data = col.Name.ToLower(),
+                AutoWidth = col.AutoWidth
+            }).ToList();
+
+            await DatatableService.CreateTable($"#{Id}", _elementRef, "dataTable_GetData", columns, DetailPageUrl, EditButton);
+            _secondRender = true;
+        }
+    }
+
+    async void IDisposable.Dispose()
+    {
+        await DatatableService.RemoveTable($"#{Id}");
+    }
+
+    /* Wrapper */
+    [JSInvokable("dataTable_GetData")]
+    public async Task<string> DataTable_GetDataWrapper(JsonElement ajaxData)
+    {
+        var json = ajaxData.GetRawText();
+
+        Console.WriteLine($"DataTable_GetDataWrapper -> Called with ajaxData = {json}");
+        var request = JsonConvert.DeserializeObject<DataTableRequest>(json);
+
+        // Get the data models
+        var take = request.Take ?? 0;
+        var skip = request.Skip ?? 0;
+        var filter = Filter;
+        filter.Take = take;
+        filter.Skip = skip;
+        var filtered = await GetData(filter, default);
+
+        // Turn data into rows
+        var rows = new List<JObject>();
+        foreach (var model in filtered.Models)
+        {
+            var row = new JObject();
+            foreach (var column in Columns)
+            {
+                var name = column.Name.ToLower();
+                var value = column.GetValue(model);
+                row[name] = value;
+            }
+            rows.Add(row);
+        }
+
+        // Create a datatable response
+        var response = new DataTableResponse()
+        {
+            Draw = request.Draw,
+            Filtered = filtered.Filtered,
+            Total = filtered.Total,
+            Data = rows
+        };
+
+        var jsonResult = JsonConvert.SerializeObject(response);
+        Console.WriteLine($"DataTable_GetDataWrapper -> Returning data: {jsonResult}");
+        return jsonResult;
+    }
+}

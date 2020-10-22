@@ -37,7 +37,7 @@
     [Parameter]
     public RenderFragment ChildContent { get; set; }
 
-    private string _originalModelJson;
+    private TModel _originalModel;
     private string _filterButtonOpenCloseClass = "oi oi-chevron-bottom";
     private bool _filterClosed = true;
     private bool _filterActive = false;
@@ -45,7 +45,8 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        _originalModelJson = JsonSerializer.Serialize(Model);
+        Console.WriteLine($"OnInitializedAsync(CollapsableFilter) -> Initializing with Model {JsonSerializer.Serialize(Model)}");
+        _originalModel = JsonSerializer.Deserialize<TModel>(JsonSerializer.Serialize(Model));
     }
 
     private async void OpenFilter()
@@ -65,7 +66,8 @@
     {
         Console.WriteLine($"ApplyFilter -> Applying {JsonSerializer.Serialize(Model)}");
         await OnFilterApplied.InvokeAsync(Model);
-
-        _filterActive = JsonSerializer.Serialize(Model) != _originalModelJson;
+        _filterActive = Model.Equals(_originalModel) == false;
+        StateHasChanged();
+        Console.WriteLine($"ApplyFilter -> Applied");
     }
 }

@@ -1,49 +1,47 @@
 @page "/character-tags"
 @using Forge.Shared
 @using Forge.Shared.Data
+@using Forge.Shared.Filters
+@using Forge.Shared.ViewModels
 @inject HttpClient Http
 
 <h1>Character tags</h1>
 
-@if (tags == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
 <div class="overview-action-bar">
     <a class="btn btn-outline-primary overview-action-btn" href="character-tag">New tag</a>
 </div>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Edit</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var tag in tags)
-            {
-            <tr>
-                <td>@tag.Id</td>
-                <td>@tag.Name</td>
-                <td>
-                    <a class="nav-link" href="character-tag/@tag.Id">
-                        <span class="oi oi-pencil" aria-hidden="true"></span> Edit
-                    </a>
-                </td>
-            </tr>
-            }
-        </tbody>
-    </table>
-}
+<CollapsableFilter TModel="CharacterTagFilter" @bind-Model="_filterModel" OnFilterApplied="FilterApplied">
+    <TextFilterComponent TModel="CharacterTagFilter" Name="Name" Model="_filterModel" Placeholder="Name" ModelUpdate="(model, val) => model.Name = val"></TextFilterComponent>
+</CollapsableFilter>
+<div style="margin-bottom: 10px"></div>
+<DataTable @ref="_dataTable" TModel="CharacterTagModel" TFilter="CharacterTagFilter" GetData="async (filter, model) => await GetData(filter)" Filter="_filterModel" DetailPageUrl="character-tag/" EditButton="true">
+    <DataTableColumn TModel="CharacterTagModel" TFilter="CharacterTagFilter" Name="Id" GetValue="(model) => model.Id.ToString()"></DataTableColumn>
+    <DataTableColumn TModel="CharacterTagModel" TFilter="CharacterTagFilter" Name="Name" GetValue="(model) => model.Name.ToString()"></DataTableColumn>
+</DataTable>
+<div style="margin-bottom: 10px"></div>
 
 @code {
-    private CharacterTagModel[] tags;
+    private CharacterTagFilter _filterModel;
+    private DataTable<CharacterTagModel, CharacterTagFilter> _dataTable;
 
     protected override async Task OnInitializedAsync()
     {
-        tags = await Http.GetFromJsonAsync<CharacterTagModel[]>("api/charactertag/get");
+        // Filter
+        _filterModel = new CharacterTagFilter();
+    }
+
+    private async Task FilterApplied(CharacterTagFilter filterModel)
+    {
+        Console.WriteLine("FilterApplied -> Called");
+        _filterModel = filterModel;
+        await _dataTable.Reload();
+    }
+
+    private async Task<CharacterTagFiltered> GetData(CharacterTagFilter filter)
+    {
+        var result = await Http.PostAsJsonAsync("api/charactertag/getfiltered", filter);
+        var filtered = await result.Content.ReadFromJsonAsync<CharacterTagFiltered>();
+
+        return filtered;
     }
 }
