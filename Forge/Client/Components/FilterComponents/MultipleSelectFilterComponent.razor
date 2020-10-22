@@ -1,0 +1,49 @@
+﻿@using System.Linq;
+@using System.Linq.Expressions;
+
+@typeparam TModel
+@typeparam TItem
+
+@inherits FilterComponent<TModel, List<TItem>>
+
+<div class="form-group">
+    <label for="@Id">@Name</label>
+    <div style="min-width: @MinWidth; max-width: @MaxWidth">
+        <Select2 TItem="TItem"
+                 Id="tags_select"
+                 Data="@Data"
+                 Placeholder="@Name"
+                 IdEpxression="@IdEpxression"
+                 TextExpression="@TextExpression"
+                 IsDisabled="@ReadOnly"
+                 @bind-Value="@Value">
+        </Select2>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public List<TItem> Data { get; set; } = new List<TItem>();
+
+    [Parameter] public Expression<Func<TItem, string>> IdEpxression { get; set; }
+    [Parameter] public Func<TItem, string> TextExpression { get; set; } = item => item.ToString();
+
+    [Parameter]
+    public string MinWidth { get; set; } = "200px";
+    [Parameter]
+    public string MaxWidth { get; set; } = "300px";
+
+    [Parameter]
+    public bool ReadOnly { get; set; }
+
+    private List<TItem> _value = new List<TItem>();
+    private List<TItem> Value { get { return _value; } set { _value = value; OnChange(); } }
+
+    private async void OnChange()
+    {
+        var idExpression = IdEpxression.Compile();
+
+        ModelUpdate(Model, _value);
+        await CollapsableFilter.ModelChanged.InvokeAsync(Model);
+    }
+}
