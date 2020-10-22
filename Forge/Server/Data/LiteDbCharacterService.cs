@@ -35,21 +35,10 @@ namespace Forge.Server.Data
 
         public CharacterModel FindOne(Guid id, bool includeDeleted = false)
         {
-            if(includeDeleted)
-            {
-                return _liteDb.GetCollection<CharacterModel>("Character")
+            return _liteDb.GetCollection<CharacterModel>("Character")
                     .Include(x => x.Tags)
-                    .Find(x => x.Id == id)
+                    .Find(x => x.Id == id && ((x.IsDeleted == false) || includeDeleted))
                     .FirstOrDefault();
-            }
-            else
-            {
-                return _liteDb.GetCollection<CharacterModel>("Character")
-                    .Include(x => x.Tags)
-                    .Find(x => x.Id == id && x.IsDeleted == false)
-                    .FirstOrDefault();
-            }
-            
         }
 
         public List<CharacterModel> FindRange(Guid[] ids, bool includeDeleted = false)
