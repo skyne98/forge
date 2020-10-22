@@ -119,7 +119,7 @@ namespace Forge.Server.Controllers
             var result = _dbCharacterTagService.RestoreOne(id);
             if (result)
             {
-                return Ok(_dbCharacterTagService.RestoreOne(id));
+                return Ok(result);
             }
             else
             {
