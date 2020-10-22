@@ -9,9 +9,12 @@ namespace Forge.Server.Data
     public interface ILiteDbCharacterTagService
     {
         bool DeleteOne(Guid id);
+        bool DeleteRange(Guid[] ids);
         bool RestoreOne(Guid id);
-        IEnumerable<CharacterTagModel> FindAll();
-        CharacterTagModel FindOne(Guid id);
+        bool RestoreRange(Guid[] ids);
+        IEnumerable<CharacterTagModel> FindAll(bool includeDeleted = false);
+        CharacterTagModel FindOne(Guid id, bool includeDeleted = false);
+        List<CharacterTagModel> FindRange(Guid[] ids, bool includeDeleted = false);
         Guid Insert(CharacterTagModel tag);
         bool Update(CharacterTagModel tag);
     }

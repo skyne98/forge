@@ -7,12 +7,12 @@
 @inject IToastService ToastService
 @inject NavigationManager NavigationManager
 
-<DetailPage Title="Tag" OnSave="Save" IsLoading="@(_tag == null)" IsCreating="@string.IsNullOrEmpty(Id)">
+<DetailPage Title="Tag" OnSave="Save" OnDelete="Delete" OnRestore="Restore" IsLoading="@(_tag == null)" IsCreating="@string.IsNullOrEmpty(Id)" IsDeleted="@(Disabled)">
     <Body>
         <form>
             <div class="form-group">
                 <label for="char_name">Name</label>
-                <input placeholder="Name" class="form-control" name="char_name" @bind="_tag.Name" />
+                <input placeholder="Name" class="form-control" name="char_name" @bind="_tag.Name" disabled="@Disabled" />
             </div>
         </form>
     </Body>
@@ -23,7 +23,20 @@
     public string Id { get; set; }
     private CharacterTagModel _tag { get; set; }
 
-    private bool Disabled { get => _tag.IsDeleted; }
+    private bool Disabled
+    { 
+        get 
+        {
+            if (_tag != null)
+            {
+                return _tag.IsDeleted;
+            }
+            else
+            {
+                return true;
+            }
+        } 
+    }
 
     protected override async Task OnInitializedAsync()
     {

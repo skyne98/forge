@@ -16,16 +16,44 @@ namespace Forge.Server.Data
             _liteDb = liteDbContext.Database;
         }
 
-        public IEnumerable<CharacterTagModel> FindAll()
+        public IEnumerable<CharacterTagModel> FindAll(bool includeDeleted = false)
         {
-            return _liteDb.GetCollection<CharacterTagModel>("CharacterTag")
-                .FindAll();
+            if(includeDeleted)
+            {
+                return _liteDb.GetCollection<CharacterTagModel>("CharacterTag")
+                    .FindAll();
+            }
+            else
+            {
+                return _liteDb.GetCollection<CharacterTagModel>("CharacterTag")
+                    .Find(x => x.IsDeleted == false);
+            }
+            
         }
 
-        public CharacterTagModel FindOne(Guid id)
+        public CharacterTagModel FindOne(Guid id, bool includeDeleted = false)
         {
-            return _liteDb.GetCollection<CharacterTagModel>("CharacterTag")
-                .Find(x => x.Id == id).FirstOrDefault();
+            
+            if(includeDeleted)
+            {
+                return _liteDb.GetCollection<CharacterTagModel>("CharacterTag")
+                    .Find(x => x.Id == id).FirstOrDefault();
+            }
+            else
+            {
+                return _liteDb.GetCollection<CharacterTagModel>("CharacterTag")
+                    .Find(x => x.Id == id && x.IsDeleted == false).FirstOrDefault();
+            }
+        }
+
+        public List<CharacterTagModel> FindRange(Guid[] ids, bool includeDeleted = false)
+        {
+            List<CharacterTagModel> tags = new List<CharacterTagModel>();
+            foreach(var id in ids)
+            {
+                tags.Add(FindOne(id, includeDeleted));
+            }
+            return tags;
         }
 
         public Guid Insert(CharacterTagModel tag)
@@ -42,18 +70,52 @@ namespace Forge.Server.Data
 
         public bool DeleteOne(Guid id)
         {
-            var tag = _liteDb.GetCollection<CharacterTagModel>("CharacterTag")
-                .FindOne(x => x.Id == id);
+            var tag = FindOne(id);
             tag.IsDeleted = true;
             return Update(tag);
         }
 
+        public bool DeleteRange(Guid[] ids)
+        {
+            var tags = FindRange(ids);
+            if(tags.Contains(null))
+            {
+                return false;
+            }
+            else
+            {
+                foreach(var tag in tags)
+                {
+                    tag.IsDeleted = true;
+                    Update(tag);
+                }
+            }
+            return true;
+        }
+
         public bool RestoreOne(Guid id)
         {
-            var tag = _liteDb.GetCollection<CharacterTagModel>("CharacterTag")
-                .FindOne(x => x.Id == id);
+            var tag = FindOne(id, true);
             tag.IsDeleted = false;
             return Update(tag);
+        }
+
+        public bool RestoreRange(Guid[] ids)
+        {
+            var tags = FindRange(ids, true);
+            if(tags.Contains(null))
+            {
+                return false;
+            }
+            else
+            {
+                foreach(var tag in tags)
+                {
+                    tag.IsDeleted = false;
+                    Update(tag);
+                }
+            }
+            return true;
         }
     }
 }

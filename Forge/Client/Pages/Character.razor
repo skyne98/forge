@@ -7,12 +7,12 @@
 @inject IToastService ToastService
 @inject NavigationManager NavigationManager
 
-<DetailPage Title="Character" OnSave="Save" IsLoading="@(_character == null)" IsCreating="@string.IsNullOrEmpty(Id)">
+<DetailPage Title="Character" OnSave="Save" OnDelete="Delete" OnRestore="Restore" IsLoading="@(_character == null)" IsCreating="@string.IsNullOrEmpty(Id)" IsDeleted="@(Disabled)">
     <Body>
         <form>
             <div class="form-group">
                 <label for="char_name">Name</label>
-                <input placeholder="Name" class="form-control" name="char_name" @bind="_character.Name" />
+                <input placeholder="Name" class="form-control" name="char_name" @bind="_character.Name" disabled="@Disabled" />
             </div>
             <div class="form-group">
                 <label>Tags</label>
@@ -22,13 +22,14 @@
                          Data="@_tags"
                          IdEpxression="(item) => item.Id.ToString()"
                          TextExpression="(item) => item.Name"
-                         @bind-Value="@_selectedTags">
+                         @bind-Value="@_selectedTags"
+                         IsDisabled="@Disabled">
                 </Select2>
             </div>
             <div class="form-group">
                 <label for="char_description">Description</label>
                 <div style="display: grid; grid-template-columns: 50% 50%; grid-template-areas: 'left right'; grid-gap: 15px">
-                    <textarea class="form-control" name="char_description" rows="20" style="grid-template: left; height: 100%" placeholder="Description" @oninput="@(args => { _character.Description = args.Value.ToString(); RenderDescription(); })" @bind="_character.Description" />
+                    <textarea class="form-control" name="char_description" rows="20" style="grid-template: left; height: 100%" placeholder="Description" @oninput="@(args => { _character.Description = args.Value.ToString(); RenderDescription(); })" @bind="_character.Description" disabled="@Disabled" />
                     <div style="grid-template: right">@((MarkupString)_descriptionMarkdown)</div>
                 </div>
             </div>
@@ -48,7 +49,20 @@
 
     private Select2<CharacterTagModel> _selectControl;
 
-    private bool Disabled { get => _character.IsDeleted; }
+    private bool Disabled
+    { 
+        get 
+        {
+            if (_character != null)
+            {
+                return _character.IsDeleted;
+            }
+            else
+            {
+                return true;
+            }
+        } 
+    }
 
     protected override async Task OnInitializedAsync()
     {

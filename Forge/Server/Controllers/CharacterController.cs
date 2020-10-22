@@ -103,6 +103,20 @@ namespace Forge.Server.Controllers
                 return NotFound();
             } 
         }
+
+        [HttpPost]
+        public ActionResult<bool> DeleteRange([FromBody] Guid[] ids)
+        {
+            var result = _dbCharacterService.DeleteRange(ids);
+            if (result)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return NotFound();
+            } 
+        }
         
         [HttpPost]
         public ActionResult<CharacterModel> RestoreOne([FromBody] Guid id)
@@ -111,6 +125,20 @@ namespace Forge.Server.Controllers
             if (result)
             {
                 return Ok(_dbCharacterService.RestoreOne(id));
+            }
+            else
+            {
+                return NotFound();
+            } 
+        }
+
+        [HttpPost]
+        public ActionResult<CharacterModel> RestoreRange([FromBody] Guid[] ids)
+        {
+            var result = _dbCharacterService.RestoreRange(ids);
+            if (result)
+            {
+                return Ok(result);
             }
             else
             {

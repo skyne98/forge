@@ -66,7 +66,7 @@ namespace Forge.Server.Controllers
             var result = _dbCharacterTagService.DeleteOne(id);
             if (result)
             {
-                return Ok(_dbCharacterTagService.DeleteOne(id));
+                return Ok(result);
             }
             else
             {
