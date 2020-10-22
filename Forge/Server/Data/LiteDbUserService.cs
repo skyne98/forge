@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Forge.Server.Data
 {
-    public class LiteDbUserService: ILiteDbUserService
+    public class LiteDbUserService: IDbUserRepository
     {
         private LiteDatabase _liteDb;
 
@@ -16,34 +16,37 @@ namespace Forge.Server.Data
             _liteDb = liteDbContext.Database;
         }
 
-        public IEnumerable<UserModel> FindAll()
+        public IEnumerable<UserModel> FindAll(bool includeDeleted = false)
         {
             return _liteDb.GetCollection<UserModel>("User")
-                .FindAll();
+                    .Find(x => x.Deleted == false || includeDeleted);
+
         }
 
-        public UserModel FindOne(Guid id)
+        public UserModel FindOne(Guid id, bool includeDeleted = false)
         {
+
             return _liteDb.GetCollection<UserModel>("User")
-                .Find(x => x.Id == id).FirstOrDefault();
+                    .Find(x => x.Id == id && (x.Deleted == false || includeDeleted))
+                    .FirstOrDefault();
         }
 
-        public Guid Insert(UserModel user)
+        public IEnumerable<UserModel> FindRange(Guid[] ids, bool includeDeleted = false)
         {
             return _liteDb.GetCollection<UserModel>("User")
-                .Insert(user);
+                    .Find(x => ((x.Deleted == false) || includeDeleted) && ids.Contains(x.Id));
         }
 
-        public bool Update(UserModel user)
+        public Guid Insert(UserModel tag)
         {
             return _liteDb.GetCollection<UserModel>("User")
-                .Update(user);
+                .Insert(tag);
         }
 
-        public bool Delete(Guid id)
+        public bool Update(UserModel tag)
         {
             return _liteDb.GetCollection<UserModel>("User")
-                .Delete(id);
+                .Update(tag);
         }
     }
 }

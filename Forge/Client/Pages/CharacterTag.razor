@@ -23,7 +23,7 @@
     [Parameter]
     public string Id { get; set; }
 
-    public bool Disabled { get => _tag?.IsDeleted ?? true; }
+    public bool Disabled { get => _tag?.Deleted ?? true; }
     private CharacterTagModel _tag { get; set; }
   
     protected override async Task OnInitializedAsync()
@@ -75,7 +75,7 @@
         if (response.IsSuccessStatusCode)
         {
             ToastService.ShowSuccess("Deletion successful");
-            _tag.IsDeleted = true;
+            _tag.Deleted = true;
             StateHasChanged();
         }
         else
@@ -92,7 +92,7 @@
         if (response.IsSuccessStatusCode)
         {
             ToastService.ShowSuccess("Restoration successful");
-            _tag.IsDeleted = false;
+            _tag.Deleted = false;
             StateHasChanged();
         }
         else

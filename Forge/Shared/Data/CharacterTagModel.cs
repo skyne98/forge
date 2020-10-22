@@ -4,10 +4,11 @@ using System.Text;
 
 namespace Forge.Shared.Data
 {
-    public class CharacterTagModel
+    public class CharacterTagModel: IModelIndexed, IModelDeletable
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
+        public bool Deleted { get; set; }
 
         public override bool Equals(Object obj)
         {
@@ -22,7 +23,5 @@ namespace Forge.Shared.Data
                 return Id == t.Id;
             }
         }
-
-        public bool IsDeleted { get; set; }
     }
 }

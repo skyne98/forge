@@ -25,9 +25,9 @@ namespace Forge.Server
         {
             services.Configure<LiteDbOptions>(Configuration.GetSection("LiteDbOptions"));
             services.AddSingleton<ILiteDbContext, LiteDbContext>();
-            services.AddTransient<ILiteDbUserService, LiteDbUserService>();
-            services.AddTransient<ILiteDbCharacterService, LiteDbCharacterService>();
-            services.AddTransient<ILiteDbCharacterTagService, LiteDbCharacterTagService>();
+            services.AddTransient<IDbUserRepository, LiteDbUserService>();
+            services.AddTransient<IDbCharacterRepository, LiteDbCharacterRepository>();
+            services.AddTransient<IDbCharacterTagRepository, LiteDbCharacterTagRepository>();
 
             services.AddControllersWithViews();
             services.AddRazorPages();

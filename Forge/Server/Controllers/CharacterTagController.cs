@@ -17,9 +17,9 @@ namespace Forge.Server.Controllers
     public class CharacterTagController: ControllerBase
     {
         private readonly ILogger<CharacterTagController> _logger;
-        private readonly ILiteDbCharacterTagService _dbCharacterTagService;
+        private readonly IDbCharacterTagRepository _dbCharacterTagService;
 
-        public CharacterTagController(ILogger<CharacterTagController> logger, ILiteDbCharacterTagService dbCharacterTagService)
+        public CharacterTagController(ILogger<CharacterTagController> logger, IDbCharacterTagRepository dbCharacterTagService)
         {
             _dbCharacterTagService = dbCharacterTagService;
             _logger = logger;
