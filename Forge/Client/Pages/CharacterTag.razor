@@ -4,7 +4,6 @@
 @using Forge.Shared.Data
 @using Markdig
 @inject HttpClient Http
-@inject IToastService toastService
 @inject NavigationManager NavigationManager
 
 <DetailPage Title="Tag" OnSave="Save" IsLoading="@(_tag == null)" IsCreating="@string.IsNullOrEmpty(Id)">
@@ -23,8 +22,6 @@
     public string Id { get; set; }
     private CharacterTagModel _tag { get; set; }
 
-    private bool Disabled { get => _tag.IsDeleted; }
-
     protected override async Task OnInitializedAsync()
     {
         Console.WriteLine($"Editing tag: {Id}");
@@ -36,69 +33,23 @@
         {
             _tag = new CharacterTagModel()
             {
-                Id = Guid.NewGuid(),
-                Name = string.Empty,
-                IsDeleted = false
+                Id = Guid.NewGuid()
             };
         }
     }
 
     private async void Save()
     {
-        var response = new HttpResponseMessage();
         if (string.IsNullOrEmpty(Id) == false)
         {
-            response = await Http.PostAsJsonAsync<CharacterTagModel>("api/charactertag/Update", _tag);
+            await Http.PostAsJsonAsync<CharacterTagModel>("api/charactertag/Update", _tag);
         }
         else
         {
-            response = await Http.PostAsJsonAsync<CharacterTagModel>("api/charactertag/Insert", _tag);
+            await Http.PostAsJsonAsync<CharacterTagModel>("api/charactertag/Insert", _tag);
             Id = _tag.Id.ToString();
             NavigationManager.NavigateTo($"/character-tag/{Id}");
             StateHasChanged();
-        }
-
-        if (response.IsSuccessStatusCode)
-        {
-            toastService.ShowSuccess("Save successful");
-        }
-        else
-        {
-            toastService.ShowError($"Error: {response.ReasonPhrase}");
-        }
-    }
-
-    private async void Delete()
-    {
-        var response = new HttpResponseMessage();
-        response = await Http.PostAsJsonAsync<Guid>("api/charactertag/DeleteOne", _tag.Id);
-
-        if (response.IsSuccessStatusCode)
-        {
-            toastService.ShowSuccess("Deletion successful");
-            _tag.IsDeleted = true;
-            StateHasChanged();
-        }
-        else
-        {
-            toastService.ShowError($"Error: {response.ReasonPhrase}");
-        }
-    }
-
-    private async void Restore()
-    {
-        var response = new HttpResponseMessage();
-        response = await Http.PostAsJsonAsync<Guid>("api/charactertag/RestoreOne", _tag.Id);
-
-        if (response.IsSuccessStatusCode)
-        {
-            toastService.ShowSuccess("Restoration successful");
-            _tag.IsDeleted = false;
-            StateHasChanged();
-        }
-        else
-        {
-            toastService.ShowError($"Error: {response.ReasonPhrase}");
         }
     }
 }
