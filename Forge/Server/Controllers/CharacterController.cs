@@ -25,18 +25,18 @@ namespace Forge.Server.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<CharacterModel> Get()
+        public IEnumerable<CharacterModel> Get(bool includeDeleted = false)
         {
-            return _dbCharacterService.FindAll()
+            return _dbCharacterService.FindAll(includeDeleted)
                 .OrderBy(character => character.Name);
         }
 
         [HttpGet]
-        public ActionResult<CharacterModel> GetOne(Guid id)
+        public ActionResult<CharacterModel> GetOne(Guid id, bool includeDeleted = false)
         {
-            var result = _dbCharacterService.FindOne(id);
+            var result = _dbCharacterService.FindOne(id, includeDeleted);
             if (result != default)
-                return Ok(_dbCharacterService.FindOne(id));
+                return Ok(_dbCharacterService.FindOne(id, includeDeleted));
             else
                 return NotFound();
         }

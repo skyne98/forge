@@ -43,7 +43,7 @@
         Console.WriteLine($"Editing tag: {Id}");
         if (string.IsNullOrEmpty(Id) == false)
         {
-            _tag = await Http.GetFromJsonAsync<CharacterTagModel>($"api/charactertag/getone?id={Id}");
+            _tag = await Http.GetFromJsonAsync<CharacterTagModel>($"api/charactertag/getone?id={Id}&includeDeleted=true");
         }
         else
         {

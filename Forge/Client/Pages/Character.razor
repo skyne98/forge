@@ -69,7 +69,7 @@
         Console.WriteLine($"Editing character: {Id}");
         if (string.IsNullOrEmpty(Id) == false)
         {
-            _character = await Http.GetFromJsonAsync<CharacterModel>($"api/character/getone?id={Id}");
+            _character = await Http.GetFromJsonAsync<CharacterModel>($"api/character/getone?id={Id}&includeDeleted=true");
         }
         else
         {
