@@ -23,20 +23,7 @@
     public string Id { get; set; }
     private CharacterTagModel _tag { get; set; }
 
-    private bool Disabled
-    { 
-        get 
-        {
-            if (_tag != null)
-            {
-                return _tag.IsDeleted;
-            }
-            else
-            {
-                return true;
-            }
-        } 
-    }
+    private bool Disabled { get => _tag?.IsDeleted ?? true; }
 
     protected override async Task OnInitializedAsync()
     {

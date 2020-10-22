@@ -49,20 +49,7 @@
 
     private Select2<CharacterTagModel> _selectControl;
 
-    private bool Disabled
-    { 
-        get 
-        {
-            if (_character != null)
-            {
-                return _character.IsDeleted;
-            }
-            else
-            {
-                return true;
-            }
-        } 
-    }
+    private bool Disabled { get => _character?.IsDeleted ?? true; }
 
     protected override async Task OnInitializedAsync()
     {
