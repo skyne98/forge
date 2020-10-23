@@ -49,7 +49,18 @@ namespace Forge.Server.Controllers
             var total = characters.Count();
 
             // Order
-            characters = characters.OrderBy(character => character.Name);
+            if (filter.Sorting == "Id")
+                if (filter.SortingDirection == SortingDirection.Ascending)
+                    characters = characters.OrderBy(character => character.Id);
+                else
+                    characters = characters.OrderByDescending(character => character.Id);
+            else if (filter.Sorting == "Name")
+                if (filter.SortingDirection == SortingDirection.Ascending)
+                    characters = characters.OrderBy(character => character.Name);
+                else
+                    characters = characters.OrderByDescending(character => character.Name);
+            else
+                characters = characters.OrderBy(character => character.Name);
 
             var result = characters.Where(character =>
             {

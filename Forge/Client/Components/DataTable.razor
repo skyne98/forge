@@ -110,7 +110,12 @@
         // Get the data models
         var take = request.Take ?? 0;
         var skip = request.Skip ?? 0;
+        var sortingColumn = request.Orderings[0]?.Column ?? 0;
+        var sortingDirection = request.Orderings[0].Dir;
+        var sortingColumnName = Columns[sortingColumn].Name;
         var filter = Filter;
+        filter.Sorting = sortingColumnName;
+        filter.SortingDirection = sortingDirection == "asc" ? SortingDirection.Ascending : SortingDirection.Descending;
         filter.Take = take;
         filter.Skip = skip;
         var filtered = await GetData(filter, default);
