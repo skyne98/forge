@@ -40,8 +40,7 @@
 @code {
     [Parameter]
     public string Id { get; set; }
-
-    public bool Disabled { get => _character?.IsDeleted ?? true; }
+    public bool Disabled { get => _character?.Deleted ?? true; }
 
     private CharacterModel _character { get; set; }
     private string _descriptionMarkdown { get; set; }
@@ -114,7 +113,7 @@
         if (response.IsSuccessStatusCode)
         {
             ToastService.ShowSuccess("Deletion successful");
-            _character.IsDeleted = true;
+            _character.Deleted = true;
             StateHasChanged();
         }
         else
@@ -131,7 +130,7 @@
         if (response.IsSuccessStatusCode)
         {
             ToastService.ShowSuccess("Restoration successful");
-            _character.IsDeleted = false;
+            _character.Deleted = false;
             StateHasChanged();
         }
         else

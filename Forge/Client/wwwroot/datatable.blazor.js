@@ -10,8 +10,21 @@ window.datatableBlazor = {
      * @param {string} detailPageUrl
      * @param {boolean} editButton
      */
-    createTable: function (table, dotnetHelper, getData, columns, detailPageUrl, editButton) {
+    createTable: function (table, dotnetHelper, getData, renderCustomColumn, columns) {
         let columnsParsed = JSON.parse(columns);
+        let customColumns = columnsParsed.filter(col => typeof (col.custom) != "undefined" && col.custom != false);
+        for (let column of customColumns) {
+            let columnName = column.name;
+
+            column.data = null;
+            column.bSortable = false;
+            column.render = function (data, type, row, meta) {
+                let currentCell = $(table).DataTable().cells({ "row": meta.row, "column": meta.col }).nodes(0);
+                let result = dotnetHelper.invokeMethod(renderCustomColumn, columnName, data);
+                return result;
+            }
+        }
+        /*
         if (editButton) {
             columnsParsed.push({
                 data: null,
@@ -19,6 +32,7 @@ window.datatableBlazor = {
                 render: function (data, type, row) { return '<a class="nav-link" href="' + detailPageUrl + data.id + '">Edit</a>'; }
             });
         }
+        */
 
         console.log('JS -> Creating a table', table, 'with getData', getData, 'and columns', columnsParsed);
 

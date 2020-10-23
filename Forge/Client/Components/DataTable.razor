@@ -3,6 +3,7 @@
 @using System.Text.Json
 @using Forge.Shared.ViewModels
 @using Forge.Shared.Filters
+@using System.Collections
 
 @typeparam TModel
 @typeparam TFilter
@@ -20,10 +21,6 @@
                     {
                         <th>@column.Name</th>
                     }
-                    @if (EditButton)
-                    {
-                        <th>Edit</th>
-                    }
                 </tr>
             </thead>
         </table>
@@ -33,12 +30,6 @@
 @code {
     [Parameter]
     public Guid Id { get; set; } = Guid.NewGuid();
-
-    [Parameter]
-    public bool EditButton { get; set; } = false;
-
-    [Parameter]
-    public string DetailPageUrl { get; set; } = null;
 
     [Parameter]
     public RenderFragment ChildContent { get; set; }
@@ -93,10 +84,11 @@
             {
                 Name = col.Name,
                 Data = col.Name.ToLower(),
-                AutoWidth = col.AutoWidth
+                AutoWidth = col.AutoWidth,
+                Custom = col.Render != null
             }).ToList();
 
-            await DatatableService.CreateTable($"#{Id}", _elementRef, "dataTable_GetData", columns, DetailPageUrl, EditButton);
+            await DatatableService.CreateTable($"#{Id}", _elementRef, "dataTable_GetData", "dataTable_RenderCustom", columns);
             _secondRender = true;
         }
     }
@@ -118,7 +110,12 @@
         // Get the data models
         var take = request.Take ?? 0;
         var skip = request.Skip ?? 0;
+        var sortingColumn = request.Orderings[0]?.Column ?? 0;
+        var sortingDirection = request.Orderings[0].Dir;
+        var sortingColumnName = Columns[sortingColumn].Name;
         var filter = Filter;
+        filter.Sorting = sortingColumnName;
+        filter.SortingDirection = sortingDirection == "asc" ? SortingDirection.Ascending : SortingDirection.Descending;
         filter.Take = take;
         filter.Skip = skip;
         var filtered = await GetData(filter, default);
@@ -132,7 +129,16 @@
             {
                 var name = column.Name.ToLower();
                 var value = column.GetValue(model);
-                row[name] = value;
+                if (value is string)
+                    row[name] = value as string;
+                else if (value is int)
+                    row[name] = (int)value;
+                else if (value is float)
+                    row[name] = (int)value;
+                else if (value.GetType().IsArray || value is IList)
+                    row[name] = JArray.FromObject(value);
+                else
+                    row[name] = JObject.FromObject(value);
             }
             rows.Add(row);
         }
@@ -149,5 +155,16 @@
         var jsonResult = JsonConvert.SerializeObject(response);
         Console.WriteLine($"DataTable_GetDataWrapper -> Returning data: {jsonResult}");
         return jsonResult;
+    }
+
+    [JSInvokable("dataTable_RenderCustom")]
+    public string DataTable_RenderCustom(string columnName, JsonElement cellData)
+    {
+        var json = cellData.GetRawText();
+        var model = JsonConvert.DeserializeObject<TModel>(json);
+        var column = Columns.First(col => col.Name == columnName);
+        var markup = column.Render(model);
+
+        return markup;
     }
 }

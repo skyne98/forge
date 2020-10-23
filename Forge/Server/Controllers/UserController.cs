@@ -15,9 +15,9 @@ namespace Forge.Server.Controllers
     public class UserController : ControllerBase
     {
         private readonly ILogger<UserController> _logger;
-        private readonly ILiteDbUserService _dbUserService;
+        private readonly IDbUserRepository _dbUserService;
 
-        public UserController(ILogger<UserController> logger, ILiteDbUserService dbUserService)
+        public UserController(ILogger<UserController> logger, IDbUserRepository dbUserService)
         {
             _dbUserService = dbUserService;
             _logger = logger;
@@ -62,7 +62,7 @@ namespace Forge.Server.Controllers
         [HttpDelete("{id}")]
         public ActionResult<UserModel> Delete(Guid id)
         {
-            var result = _dbUserService.Delete(id);
+            var result = _dbUserService.DeleteOne(id);
             if (result)
                 return NoContent();
             else

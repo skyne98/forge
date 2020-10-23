@@ -17,9 +17,9 @@ namespace Forge.Server.Controllers
     public class CharacterTagController: ControllerBase
     {
         private readonly ILogger<CharacterTagController> _logger;
-        private readonly ILiteDbCharacterTagService _dbCharacterTagService;
+        private readonly IDbCharacterTagRepository _dbCharacterTagService;
 
-        public CharacterTagController(ILogger<CharacterTagController> logger, ILiteDbCharacterTagService dbCharacterTagService)
+        public CharacterTagController(ILogger<CharacterTagController> logger, IDbCharacterTagRepository dbCharacterTagService)
         {
             _dbCharacterTagService = dbCharacterTagService;
             _logger = logger;
@@ -49,7 +49,18 @@ namespace Forge.Server.Controllers
             var total = tags.Count();
 
             // Order
-            tags = tags.OrderBy(tag => tag.Name);
+            if (filter.Sorting == "Id")
+                if (filter.SortingDirection == SortingDirection.Ascending)
+                    tags = tags.OrderBy(tag => tag.Id);
+                else
+                    tags = tags.OrderByDescending(tag => tag.Id);
+            else if (filter.Sorting == "Name")
+                if (filter.SortingDirection == SortingDirection.Ascending)
+                    tags = tags.OrderBy(tag => tag.Name);
+                else
+                    tags = tags.OrderByDescending(tag => tag.Name);
+            else
+                tags = tags.OrderBy(tag => tag.Name);
 
             var result = tags.Where(tag => {
                     var result = true;

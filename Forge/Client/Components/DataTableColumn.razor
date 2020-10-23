@@ -14,7 +14,10 @@
     public bool AutoWidth { get; set; } = true;
 
     [Parameter]
-    public Func<TModel, string> GetValue { get; set; } = (model) => "None";
+    public Func<TModel, object> GetValue { get; set; } = (model) => "None";
+
+    [Parameter]
+    public Func<TModel, string> Render { get; set; } = null;
 
     protected override void OnInitialized()
     {
