@@ -4,14 +4,15 @@ html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
+/* Palette https://colorhunt.co/palette/167893 */
 a, .btn-link {
-    color: #0366d6;
+    color: #3282b8;
 }
 
 .btn-primary {
     color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+    background-color: #3282b8;
+    border-color: #0f4c75;
 }
 
 app {
@@ -46,8 +47,9 @@ app {
     text-overflow: ellipsis;
 }
 
+/* Palette https://colorhunt.co/palette/163991 */
 .sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    background-image: linear-gradient(180deg, #2d132c 0%, #801336 70%);
 }
 
     .sidebar .top-row {
