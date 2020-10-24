@@ -8,7 +8,7 @@
 <h1>Images</h1>
 
 <div class="overview-action-bar">
-    <a class="btn btn-outline-primary overview-action-btn" href="image">New image</a>
+    <a class="btn btn-outline-primary overview-action-btn" href="image">New image <span class="oi oi-file"></span></a>
 </div>
 <CollapsableFilter TModel="ImageFilter" @bind-Model="_filterModel" OnFilterApplied="FilterApplied">
     <TextFilterComponent TModel="ImageFilter" Name="Title" Model="_filterModel" Placeholder="Title" ModelUpdate="(model, val) => model.Title = val"></TextFilterComponent>

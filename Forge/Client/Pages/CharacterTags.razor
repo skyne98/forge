@@ -8,7 +8,7 @@
 <h1>Character tags</h1>
 
 <div class="overview-action-bar">
-    <a class="btn btn-outline-primary overview-action-btn" href="character-tag">New tag</a>
+    <a class="btn btn-outline-primary overview-action-btn" href="character-tag">New tag <span class="oi oi-file"></span></a>
 </div>
 <CollapsableFilter TModel="CharacterTagFilter" @bind-Model="_filterModel" OnFilterApplied="FilterApplied">
     <TextFilterComponent TModel="CharacterTagFilter" Name="Name" Model="_filterModel" Placeholder="Name" ModelUpdate="(model, val) => model.Name = val"></TextFilterComponent>

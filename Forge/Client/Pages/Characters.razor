@@ -9,7 +9,7 @@
 <h1>Characters</h1>
 
 <div class="overview-action-bar">
-    <a class="btn btn-outline-primary overview-action-btn" href="character">New character</a>
+    <a class="btn btn-outline-primary overview-action-btn" href="character">New character <span class="oi oi-file"></span></a>
 </div>
 <CollapsableFilter TModel="CharacterFilter" @bind-Model="_filterModel" OnFilterApplied="FilterApplied">
     <TextFilterComponent TModel="CharacterFilter" Name="Name" Model="_filterModel" Placeholder="Name" ModelUpdate="(model, val) => model.Name = val"></TextFilterComponent>
