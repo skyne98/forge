@@ -1,0 +1,53 @@
+@page "/images"
+@using Forge.Shared
+@using Forge.Shared.Data
+@using Forge.Shared.Filters
+@using Forge.Shared.ViewModels
+@inject HttpClient Http
+
+<h1>Images</h1>
+
+<div class="overview-action-bar">
+    <a class="btn btn-outline-primary overview-action-btn" href="image">New image</a>
+</div>
+<CollapsableFilter TModel="ImageFilter" @bind-Model="_filterModel" OnFilterApplied="FilterApplied">
+    <TextFilterComponent TModel="ImageFilter" Name="Title" Model="_filterModel" Placeholder="Title" ModelUpdate="(model, val) => model.Title = val"></TextFilterComponent>
+</CollapsableFilter>
+<div style="margin-bottom: 10px"></div>
+<DataTable @ref="_dataTable" TModel="ImageModel" TFilter="ImageFilter" GetData="async (filter, model) => await GetData(filter)" Filter="_filterModel">
+    <DataTableColumn TModel="ImageModel" TFilter="ImageFilter" Name="Id" GetValue="(model) => model.Id.ToString()"></DataTableColumn>
+    <DataTableColumn TModel="ImageModel" TFilter="ImageFilter" Name="Title" GetValue="(model) => model.Title.ToString()"></DataTableColumn>
+    <DataTableColumn TModel="ImageModel" TFilter="ImageFilter" Name="Edit" Render="RenderEdit"></DataTableColumn>
+</DataTable>
+<div style="margin-bottom: 10px"></div>
+
+@code {
+    private ImageFilter _filterModel;
+    private DataTable<ImageModel, ImageFilter> _dataTable;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Filter
+        _filterModel = new ImageFilter();
+    }
+
+    private string RenderEdit(ImageModel model)
+    {
+        return "<a class=\"nav-link\" href=\"image/" + model.Id + "\">Edit</a>";
+    }
+
+    private async Task FilterApplied(ImageFilter filterModel)
+    {
+        Console.WriteLine("FilterApplied -> Called");
+        _filterModel = filterModel;
+        await _dataTable.Reload();
+    }
+
+    private async Task<ImageFiltered> GetData(ImageFilter filter)
+    {
+        var result = await Http.PostAsJsonAsync("api/image/getfiltered", filter);
+        var filtered = await result.Content.ReadFromJsonAsync<ImageFiltered>();
+
+        return filtered;
+    }
+}

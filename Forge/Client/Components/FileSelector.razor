@@ -1,0 +1,71 @@
+﻿@using Newtonsoft.Json
+@using Newtonsoft.Json.Linq
+@using System.Text.Json
+@using Forge.Shared.ViewModels
+@using Forge.Shared.Filters
+@using System.Collections
+
+@inject UppyService UppyService
+@implements IDisposable
+
+<div>
+    <CascadingValue Value="this">
+        <div @ref="Ref" id="@Id"></div>
+    </CascadingValue>
+</div>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; } = Utilities.EnsureStartsWithLetter(Guid.NewGuid());
+
+    [Parameter]
+    public bool Inline { get; set; } = true;
+
+    [Parameter]
+    public List<FileSelectorFile> Value { get; set; }
+
+    [Parameter]
+    public EventCallback<List<FileSelectorFile>> ValueChanged { get; set; }
+
+    public ElementReference Ref { get; set; }
+    private DotNetObjectReference<FileSelector> _elementRef;
+    private bool _secondRender = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        Console.WriteLine($"OnInitializedAsync (FileSelector) -> Called with Value = {JsonConvert.SerializeObject(Value)}");
+        _elementRef = DotNetObjectReference.Create(this);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await UppyService.Create(_elementRef, $"#{Id}", Inline, "uppy_FileAdded", "uppy_FileRemoved");
+        }
+    }
+
+    async void IDisposable.Dispose()
+    {
+        await UppyService.Remove($"#{Id}");
+    }
+
+    [JSInvokable("uppy_FileAdded")]
+    public void Uppy_FileAdded(string filename, string filetype, string content)
+    {
+        Value.Add(new FileSelectorFile()
+        {
+            Name = filename,
+            Type = filetype,
+            Content = content.Split(';').Last().Split(',').Last()
+        });
+    }
+
+    [JSInvokable("uppy_FileRemoved")]
+    public void Uppy_FileRemoved(string filename)
+    {
+        Value.RemoveAll(file => file.Name == filename);
+    }
+}

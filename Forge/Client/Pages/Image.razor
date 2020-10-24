@@ -1,0 +1,161 @@
+@page "/image"
+@page "/image/{Id}"
+@using Forge.Shared
+@using Forge.Shared.Data
+@using Forge.Shared.Requests
+@using Forge.Client.Components
+@using Markdig
+@inject HttpClient Http
+@inject IToastService ToastService
+@inject NavigationManager NavigationManager 
+@inject WebService WebService
+
+@inject NavigationManager NavigationManager
+
+<DetailPage Title="Image" OnSave="Save" OnDelete="Delete" OnRestore="Restore" IsLoading="@(_image == null)" IsCreating="@string.IsNullOrEmpty(Id)" IsDeleted="@(Disabled)">
+    <Actions>
+        @if (string.IsNullOrEmpty(Id) == false)
+        {
+            <button class="btn btn-outline-secondary overview-action-btn" @onclick="CopyURL">Copy URL <span class="oi oi-clipboard"></span></button>
+        }
+    </Actions>
+    <Body>
+        <form>
+            <div class="form-group">
+                <label for="image_title">Name</label>
+                <input placeholder="Title" class="form-control" name="image_title" @bind="_image.Title" disabled="@Disabled" />
+            </div>
+            @if (Disabled == false)
+            {
+                <div style="display: flex; flex-direction: row; flex-wrap: wrap;">
+                    <FileSelector Inline="true" @bind-Value="_files"></FileSelector>
+                    <img src="@(GetURL(true) + "&width=400&height=400&resize=pad")" style="width: 400px; height: 400px" />
+                </div>
+            }
+        </form>
+    </Body>
+</DetailPage>
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    public bool Disabled { get => _image?.Deleted ?? true; }
+    private ImageModel _image { get; set; }
+    private string _content;
+    private List<FileSelectorFile> _files = new List<FileSelectorFile>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Console.WriteLine($"Editing image: {Id}");
+        if (string.IsNullOrEmpty(Id) == false)
+        {
+            _image = await Http.GetFromJsonAsync<ImageModel>($"api/image/getone?id={Id}&includeDeleted=true");
+        }
+        else
+        {
+            _image = new ImageModel()
+            {
+                Id = Guid.NewGuid()
+            };
+        }
+    }
+
+    private string GetURL(bool withRandomPayload = false)
+    {
+        if (string.IsNullOrEmpty(Id) == false)
+        {
+            var baseUri = NavigationManager.BaseUri;
+            var result = $"{baseUri}api/image/download?id={Id}";
+
+            if (withRandomPayload)
+            {
+                result += $"&payload={DateTime.Now.Ticks}";
+            }
+
+            return result;
+        }
+
+        return null;
+    }
+
+    private async Task CopyURL()
+    {
+        await WebService.CopyTextToClipboard(GetURL());
+    }
+
+    private async void Save()
+    {
+        // Set the file
+        if (_files.Count > 0)
+        {
+            var file = _files.First();
+            _content = file.Content;
+            _image.Type = file.Type;
+            _image.Filename = file.Name;
+        }
+
+        HttpResponseMessage response;
+        if (string.IsNullOrEmpty(Id) == false)
+        {
+            response = await Http.PostAsJsonAsync("api/image/Update", new ImageRequest() { Model = _image, ContentBase64 = _content });
+        }
+        else
+        {
+            // Validation
+            if (string.IsNullOrEmpty(_content))
+            {
+                ToastService.ShowError($"Image cannot be empty");
+                return;
+            }
+
+            response = await Http.PostAsJsonAsync("api/image/Insert", new ImageRequest() { Model = _image, ContentBase64 = _content });
+            Id = _image.Id.ToString();
+            NavigationManager.NavigateTo($"/image/{Id}");
+        }
+
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess("Save successful");
+            StateHasChanged();
+        }
+        else
+        {
+            ToastService.ShowError($"Error: {response.ReasonPhrase}");
+        }
+    }
+
+    private async void Delete()
+    {
+        var response = new HttpResponseMessage();
+        response = await Http.PostAsJsonAsync<Guid>("api/image/DeleteOne", _image.Id);
+
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess("Deletion successful");
+            _image.Deleted = true;
+            StateHasChanged();
+        }
+        else
+        {
+            ToastService.ShowError($"Error: {response.ReasonPhrase}");
+        }
+    }
+
+    private async void Restore()
+    {
+        var response = new HttpResponseMessage();
+        response = await Http.PostAsJsonAsync<Guid>("api/image/RestoreOne", _image.Id);
+
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess("Restoration successful");
+            _image.Deleted = false;
+            StateHasChanged();
+        }
+        else
+        {
+            ToastService.ShowError($"Error: {response.ReasonPhrase}");
+        }
+    }
+}

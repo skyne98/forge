@@ -23,6 +23,8 @@ namespace Forge.Client
             builder.Services.AddTransient(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
             builder.Services.AddTransient<JqueryService>();
             builder.Services.AddTransient<DatatableService>();
+            builder.Services.AddTransient<UppyService>();
+            builder.Services.AddTransient<WebService>();
             builder.Services.AddBlazoredToast();
 
             await builder.Build().RunAsync();

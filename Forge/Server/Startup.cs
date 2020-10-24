@@ -28,6 +28,7 @@ namespace Forge.Server
             services.AddTransient<IDbUserRepository, LiteDbUserService>();
             services.AddTransient<IDbCharacterRepository, LiteDbCharacterRepository>();
             services.AddTransient<IDbCharacterTagRepository, LiteDbCharacterTagRepository>();
+            services.AddTransient<IDbImageRepository, LiteDbImageRepository>();
 
             services.AddControllersWithViews();
             services.AddRazorPages();

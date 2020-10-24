@@ -11,7 +11,7 @@ namespace Forge.Server.Data
         IEnumerable<TModel> FindAll(bool includeDeleted = false);
         TModel FindOne(Guid id, bool includeDeleted = false);
         IEnumerable<TModel> FindRange(Guid[] ids, bool includeDeleted = false);
-        Guid Insert(TModel user);
-        bool Update(TModel user);
+        Guid Insert(TModel model);
+        bool Update(TModel model);
     }
 }
