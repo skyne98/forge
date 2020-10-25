@@ -5,7 +5,8 @@ script:
  - dotnet restore
  - dotnet publish --configuration Release --runtime win10-x64 
  - zip -9r win10-x64.zip Forge/Server/bin/Release/netcoreapp3.1/win10-x64/publish
- - dotnet test Forge/Tests/Forge.Tests.csproj
+ - dotnet test Forge/Shared.Tests/Forge.Shared.Tests.csproj
+ - dotnet test Forge/Server.Tests/Forge.Server.Tests.csproj
 deploy:
   provider: releases
   api_key: "$GITHUB_TOKEN"
