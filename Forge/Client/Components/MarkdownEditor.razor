@@ -1,0 +1,128 @@
+﻿@using Newtonsoft.Json
+@using Newtonsoft.Json.Linq
+@using System.Text.Json
+@using Forge.Shared.ViewModels
+@using Forge.Shared.Filters
+@using System.Collections
+@using Markdig
+
+@inject SimpleMDEService SimpleMDEService
+@implements IDisposable
+
+<div id="@(Id + "_wrapper")">
+    <CascadingValue Value="this">
+        @if (ReadOnly == false)
+        {
+            <textarea @ref="Ref" id="@Id"></textarea>
+        }
+        else
+        {
+            <div @ref="Ref" id="@Id">@((MarkupString)MarkdownEditor_RenderMarkdown(Value))</div>
+        }
+    </CascadingValue>
+</div>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; } = Utilities.EnsureStartsWithLetter(Guid.NewGuid());
+
+    [Parameter]
+    public string Value { get; set; }
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    [Parameter]
+    public bool ReadOnly { get; set; }
+
+    public ElementReference Ref { get; set; }
+    private DotNetObjectReference<MarkdownEditor> _elementRef;
+    private bool _secondRender = false;
+    private MarkdownPipeline _pipeline;
+    private bool _previousReadOnly;
+    private bool _initRequired;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        _pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+
+        Console.WriteLine($"OnInitializedAsync (MarkdownEditor) -> Called with Value = {JsonConvert.SerializeObject(Value)}");
+        _elementRef = DotNetObjectReference.Create(this);
+
+        _previousReadOnly = ReadOnly;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Console.WriteLine("OnAfterRenderAsync (MarkdownEditor) -> Called");
+
+        if (firstRender || _initRequired)
+        {
+            if (ReadOnly == false)
+            {
+                await SimpleMDEService.Create(_elementRef, $"#{Id}", ReadOnly, "markdownEditor_RenderMarkdown", "markdownEditor_OnChange");
+                _initRequired = false;
+            }
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Console.WriteLine("OnParametersSetAsync (MarkdownEditor) -> Called");
+
+        // ReadOnly change
+        if (ReadOnly != _previousReadOnly)
+        {
+            // Changed
+            if (ReadOnly)
+            {
+                Console.WriteLine("OnParametersSetAsync (MarkdownEditor) -> Removing SimpleMDE, turning ReadOnly");
+                SimpleMDEService.Remove($"#{Id}", false);
+            }
+            else
+            {
+                Console.WriteLine("OnParametersSetAsync (MarkdownEditor) -> Initializing SimpleMDE, turning off ReadOnly");
+                _initRequired = true;
+            }
+        }
+        _previousReadOnly = ReadOnly;
+
+        // New value
+        var currentValue = await SimpleMDEService.GetValue($"#{Id}");
+        if (currentValue != Value)
+            await SimpleMDEService.SetValue($"#{Id}", Value);
+    }
+
+    async void IDisposable.Dispose()
+    {
+        if (ReadOnly == false)
+            await SimpleMDEService.RemoveAsync($"#{Id}");
+    }
+
+    [JSInvokable("markdownEditor_RenderMarkdown")]
+    public string MarkdownEditor_RenderMarkdown(string plainText)
+    {
+        var result = "";
+
+        if (string.IsNullOrEmpty(plainText) == false && _pipeline != null)
+        {
+            result = Markdown.ToHtml(plainText, _pipeline);
+        }
+
+        Console.WriteLine($"Render -> Finished rendering markdown...");
+        return result;
+    }
+
+    [JSInvokable("markdownEditor_OnChange")]
+    public async void MarkdownEditor_OnChange(string value)
+    {
+        Console.WriteLine($"MarkdownEditor_OnChange (MarkdownEditor) -> Got value = {value}");
+
+        if (value != Value)
+        {
+            Value = value;
+            await ValueChanged.InvokeAsync(value);
+        }
+    }
+}
