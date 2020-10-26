@@ -17,7 +17,11 @@
         }
         else
         {
-            <div @ref="Ref" id="@Id">@((MarkupString)MarkdownEditor_RenderMarkdown(Value))</div>
+            <div class="card">
+                <div class="card-body">
+                    <div @ref="Ref" id="@Id">@((MarkupString)MarkdownEditor_RenderMarkdown(Value))</div>
+                </div>
+            </div>
         }
     </CascadingValue>
 </div>
@@ -27,7 +31,7 @@
     public Guid Id { get; set; } = Utilities.EnsureStartsWithLetter(Guid.NewGuid());
 
     [Parameter]
-    public string Value { get; set; }
+    public string Value { get; set; } = String.Empty;
     [Parameter]
     public EventCallback<string> ValueChanged { get; set; }
 
@@ -91,7 +95,7 @@
         // New value
         var currentValue = await SimpleMDEService.GetValue($"#{Id}");
         if (currentValue != Value)
-            await SimpleMDEService.SetValue($"#{Id}", Value);
+            await SimpleMDEService.SetValue($"#{Id}", Value ?? String.Empty);
     }
 
     async void IDisposable.Dispose()

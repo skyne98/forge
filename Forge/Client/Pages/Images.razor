@@ -4,6 +4,7 @@
 @using Forge.Shared.Filters
 @using Forge.Shared.ViewModels
 @inject HttpClient Http
+@inject NavigationManager NavigationManager
 
 <h1>Images</h1>
 
@@ -17,6 +18,7 @@
 <DataTable @ref="_dataTable" TModel="ImageModel" TFilter="ImageFilter" GetData="async (filter, model) => await GetData(filter)" Filter="_filterModel">
     <DataTableColumn TModel="ImageModel" TFilter="ImageFilter" Name="Id" GetValue="(model) => model.Id.ToString()"></DataTableColumn>
     <DataTableColumn TModel="ImageModel" TFilter="ImageFilter" Name="Title" GetValue="(model) => model.Title.ToString()"></DataTableColumn>
+    <DataTableColumn TModel="ImageModel" TFilter="ImageFilter" Name="Preview" Render="RenderPreview"></DataTableColumn>
     <DataTableColumn TModel="ImageModel" TFilter="ImageFilter" Name="Edit" Render="RenderEdit"></DataTableColumn>
 </DataTable>
 <div style="margin-bottom: 10px"></div>
@@ -29,6 +31,24 @@
     {
         // Filter
         _filterModel = new ImageFilter();
+    }
+
+    private string RenderPreview(ImageModel model)
+    {
+        return $"<img src=\"{GetURL(model.Id, true)}\" style=\"\" />";
+    }
+
+    private string GetURL(Guid imageId, bool withRandomPayload = false)
+    {
+        var baseUri = NavigationManager.BaseUri;
+        var result = $"{baseUri}api/image/download?id={imageId}&width=100&height=100";
+
+        if (withRandomPayload)
+        {
+            result += $"&payload={DateTime.Now.Ticks}";
+        }
+
+        return result;
     }
 
     private string RenderEdit(ImageModel model)

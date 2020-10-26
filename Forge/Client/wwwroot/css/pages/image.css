@@ -1,0 +1,31 @@
+﻿/* General */
+/* made with https://grid.layoutit.com/ */
+.image-container {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: 1fr;
+    gap: 10px 10px;
+    grid-template-areas: "image-area detail-area";
+}
+.image-area {
+    grid-area: image-area;
+}
+.details-area {
+    grid-area: detail-area;
+}
+
+@media (max-width: 767.98px) {
+    /* Phone */
+    .image-container {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr;
+        gap: 10px 10px;
+        grid-template-areas: "image-area" "detail-area";
+    }
+}
+
+@media (min-width: 768px) {
+    /* Desktop */
+
+}

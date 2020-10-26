@@ -51,19 +51,22 @@ window.select2Blazor = {
         if (value) {
             var $select2 = $('#' + id);
             var selection = $('#' + id).select2('data');
-            var isAlreadySelected = selection.filter(x => x.id === value.id).length > 0;
-            if (isAlreadySelected) {
-                return;
-            }
 
-            // Set the value, creating a new option if necessary
-            if ($select2.find(`option[value='${value.id}']`).length) {
-                $select2.val(value.id).trigger('change');
-            } else { 
-                // Create a DOM Option and pre-select by default
-                var newOption = new Option(value.text, value.id, true, true);
-                // Append it to the select
-                $select2.append(newOption).trigger('change');
+            if (typeof (selection) != "undefined") {
+                var isAlreadySelected = selection.filter(x => x.id === value.id).length > 0;
+                if (isAlreadySelected) {
+                    return;
+                }
+
+                // Set the value, creating a new option if necessary
+                if ($select2.find(`option[value='${value.id}']`).length) {
+                    $select2.val(value.id).trigger('change');
+                } else {
+                    // Create a DOM Option and pre-select by default
+                    var newOption = new Option(value.text, value.id, true, true);
+                    // Append it to the select
+                    $select2.append(newOption).trigger('change');
+                }
             }
         }
     },

@@ -10,6 +10,10 @@
 
 <div>
     <CascadingValue Value="this">
+        @if (Inline == false)
+        {
+            <button class="btn btn-outline-secondary" @onclick="OnOpen">Open</button>
+        }
         <div @ref="Ref" id="@Id"></div>
     </CascadingValue>
 </div>
@@ -20,6 +24,11 @@
 
     [Parameter]
     public bool Inline { get; set; } = true;
+
+    [Parameter]
+    public int Width { get; set; } = 0;
+    [Parameter]
+    public int Height { get; set; } = 0;
 
     [Parameter]
     public List<FileSelectorFile> Value { get; set; }
@@ -43,13 +52,22 @@
     {
         if (firstRender)
         {
-            await UppyService.Create(_elementRef, $"#{Id}", Inline, "uppy_FileAdded", "uppy_FileRemoved");
+            await UppyService.Create(_elementRef, $"#{Id}", Inline, Width, Height, "uppy_FileAdded", "uppy_FileRemoved");
         }
     }
 
     async void IDisposable.Dispose()
     {
         await UppyService.Remove($"#{Id}");
+    }
+
+    private async Task OnOpen()
+    {
+        var isOpen = await UppyService.IsModalOpen($"#{Id}");
+        if (isOpen)
+            await UppyService.CloseModal($"#{Id}");
+        else
+            await UppyService.OpenModal($"#{Id}");
     }
 
     [JSInvokable("uppy_FileAdded")]
