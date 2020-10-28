@@ -13,6 +13,7 @@
 </div>
 <CollapsableFilter TModel="ImageFilter" @bind-Model="_filterModel" OnFilterApplied="FilterApplied">
     <TextFilterComponent TModel="ImageFilter" Name="Title" Model="_filterModel" Placeholder="Title" ModelUpdate="(model, val) => model.Title = val"></TextFilterComponent>
+    <TextFilterComponent TModel="ImageFilter" Name="Body" Model="_filterModel" Placeholder="Body" ModelUpdate="(model, val) => model.Body = val"></TextFilterComponent>
 </CollapsableFilter>
 <div style="margin-bottom: 10px"></div>
 <DataTable @ref="_dataTable" TModel="ImageModel" TFilter="ImageFilter" GetData="async (filter, model) => await GetData(filter)" Filter="_filterModel">

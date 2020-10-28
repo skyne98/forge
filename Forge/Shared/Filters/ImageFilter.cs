@@ -7,6 +7,7 @@ namespace Forge.Shared.Filters
     public class ImageFilter: BaseFilter
     {
         public string Title { get; set; } = String.Empty;
+        public string Body { get; set; } = String.Empty;
 
         public override bool Equals(object obj)
         {
@@ -17,12 +18,12 @@ namespace Forge.Shared.Filters
                 return false;
             }
 
-            return this.Title.Equals(item.Title);
+            return Title.Equals(item.Title) && Body.Equals(item.Body);
         }
 
         public override int GetHashCode()
         {
-            return this.Title.GetHashCode();
+            return (Title + Body).GetHashCode();
         }
     }
 }

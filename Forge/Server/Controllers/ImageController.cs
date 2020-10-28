@@ -119,6 +119,13 @@ namespace Forge.Server.Controllers
                             result = false;
                         }
                     }
+                    if (string.IsNullOrEmpty(filter.Body) == false)
+                    {
+                        if (tag.Body.ToLower().Contains(filter.Body.ToLower()) == false)
+                        {
+                            result = false;
+                        }
+                    }
 
                     return result;
                 });
