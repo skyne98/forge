@@ -25,6 +25,7 @@ namespace Forge.Client
             builder.Services.AddTransient<DatatableService>();
             builder.Services.AddTransient<UppyService>();
             builder.Services.AddTransient<SimpleMDEService>();
+            builder.Services.AddTransient<PixiService>();
             builder.Services.AddTransient<WebService>();
             builder.Services.AddBlazoredToast();
 

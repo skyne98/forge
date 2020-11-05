@@ -1,0 +1,55 @@
+﻿@using System.Text.Json
+@using Forge.Shared.ViewModels
+@using Forge.Shared.Filters
+@using System.Collections
+
+@inject PixiService PixiService
+@implements IDisposable
+
+<div style="position: relative">
+    <canvas id="@Id" style="width: 100%; position: absolute; top: 0; left: 0"></canvas>
+</div>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; } = Utilities.EnsureStartsWithLetter(Guid.NewGuid());
+
+    [Parameter]
+    public Action<GraphicsEngine> OnUpdate { get; set; } = (engine) => { };
+
+    private DotNetObjectReference<GraphicsCanvas> _elementRef;
+    private GraphicsEngine _engine;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        Console.WriteLine($"OnInitializedAsync (GraphicsCanvas)");
+        _elementRef = DotNetObjectReference.Create(this);
+        _engine = new GraphicsEngine($"#{Id}", PixiService);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await PixiService.Create($"#{Id}", _elementRef, "graphicsCanvas_OnUpdate");
+        }
+    }
+
+    async void IDisposable.Dispose()
+    {
+        await PixiService.Remove($"#{Id}");
+    }
+
+
+
+    [JSInvokable("graphicsCanvas_OnUpdate")]
+    public void GraphicsCanvas_OnUpdate(double delta, double ellapsed)
+    {
+        _engine.Delta = delta;
+        _engine.Ellapsed = ellapsed;
+
+        OnUpdate?.Invoke(_engine);
+    }
+}

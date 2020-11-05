@@ -1,7 +1,49 @@
-﻿@page "/"
+﻿@using System.Text.Json
+@using Forge.Client.Components 
 
-<h1>Hello, world!</h1>
+@page "/"
 
-Welcome to your new app.
+<h1>Welcome to Forge!</h1>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+Time to start creating your immersive worlds now.
+
+<GraphicsCanvas OnUpdate="OnUpdate"></GraphicsCanvas>
+
+@code {
+    private GraphicsContainer _container = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+    }
+
+    private void OnUpdate(GraphicsEngine engine)
+    {
+        var size = engine.ScreenSize;
+
+        if (_container == null)
+        {
+            _container = engine.CreateContainer();
+            engine.AddToStage(_container);
+
+            var uri = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Godot_icon.svg/1024px-Godot_icon.svg.png";
+            var spriteOne = engine.CreateSprite(uri);
+            spriteOne.Width = 64;
+            spriteOne.Height = 64;
+            spriteOne.SetAnchor(0.5f);
+            spriteOne.X = -64;
+            _container.AddChild(spriteOne);
+
+            var spriteTwo = engine.CreateSprite(uri);
+            spriteTwo.Width = 64;
+            spriteTwo.Height = 64;
+            spriteTwo.SetAnchor(0.5f);
+            spriteTwo.X = 64;
+            _container.AddChild(spriteTwo);
+        }
+
+        _container.X = size.Width / 2;
+        _container.Y = size.Height / 2;
+        _container.Angle += 360 * engine.Ellapsed;
+    }
+}
