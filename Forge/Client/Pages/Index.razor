@@ -11,6 +11,7 @@ Time to start creating your immersive worlds now.
 
 @code {
     private GraphicsContainer _container = null;
+    private GraphicsSprite _translationSprite = null;
 
     protected override async Task OnInitializedAsync()
     {
@@ -40,10 +41,20 @@ Time to start creating your immersive worlds now.
             spriteTwo.SetAnchor(0.5f);
             spriteTwo.X = 64;
             _container.AddChild(spriteTwo);
+
+            _translationSprite = engine.CreateSprite(uri);
+            _translationSprite.Width = 64;
+            _translationSprite.Height = 64;
+            _translationSprite.SetAnchor(0.5f);
+            engine.AddToStage(_translationSprite);
         }
 
         _container.X = size.Width / 2;
         _container.Y = size.Height / 2;
         _container.Angle += 360 * engine.Ellapsed;
+
+        var translationSpritePosition = _container.ToGlobal(0f, 100f);
+        _translationSprite.X = translationSpritePosition.x;
+        _translationSprite.Y = translationSpritePosition.y;
     }
 }

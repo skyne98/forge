@@ -145,6 +145,24 @@ window.pixiBlazor = {
             container.removeChild(displayObject);
         }
     },
+    toLocal: function (target, id, x, y) {
+        let pixi = pixiInstances.get(target);
+        let pixiData = pixiInstaceDatas.get(target);
+        if (typeof (pixi) != "undefined" && typeof (pixiData) != "undefined") {
+            let displayObject = pixiData.displayObjects.get(id);
+            let position = displayObject.toLocal({ x, y });
+            return `[${position.x}, ${position.y}]`;
+        }
+    },
+    toGlobal: function (target, id, x, y) {
+        let pixi = pixiInstances.get(target);
+        let pixiData = pixiInstaceDatas.get(target);
+        if (typeof (pixi) != "undefined" && typeof (pixiData) != "undefined") {
+            let displayObject = pixiData.displayObjects.get(id);
+            let position = displayObject.toGlobal({ x, y });
+            return `[${position.x}, ${position.y}]`;
+        }
+    },
     getDisplayObjectMember: function (target, id, memberPath) {
         let pixi = pixiInstances.get(target);
         let pixiData = pixiInstaceDatas.get(target);

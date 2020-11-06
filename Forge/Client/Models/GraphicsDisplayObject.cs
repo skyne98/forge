@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 
 namespace Forge.Client.Models
@@ -39,5 +40,17 @@ namespace Forge.Client.Models
         }
 
         private GraphicsDisplayObject() { }
+
+        public (double x, double y) ToLocal(double x, double y)
+        {
+            var result = _pixiService.ToLocal(_target, Id, x, y);
+            return (result[0], result[1]);
+        }
+
+        public (double x, double y) ToGlobal(double x, double y)
+        {
+            var result = _pixiService.ToGlobal(_target, Id, x, y);
+            return (result[0], result[1]);
+        }
     }
 }

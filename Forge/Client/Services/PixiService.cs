@@ -77,6 +77,18 @@ namespace Forge.Client.Services
             _jsRuntime.InvokeVoid("pixiBlazor.removeDisplayObjectFromContainer", target, id, containerId);
         }
 
+        public List<double> ToLocal(string target, int id, double x, double y)
+        {
+            var resultJson = _jsRuntime.Invoke<string>("pixiBlazor.toLocal", target, id, x, y);
+            return JsonSerializer.Deserialize<List<double>>(resultJson);
+        }
+
+        public List<double> ToGlobal(string target, int id, double x, double y)
+        {
+            var resultJson = _jsRuntime.Invoke<string>("pixiBlazor.toGlobal", target, id, x, y);
+            return JsonSerializer.Deserialize<List<double>>(resultJson);
+        }
+
         public T GetDisplayObjectMember<T>(string target, int id, List<string> memberPath)
         {
             return _jsRuntime.Invoke<T>("pixiBlazor.getDisplayObjectMember", target, id, memberPath);
